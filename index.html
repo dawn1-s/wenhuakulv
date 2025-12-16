@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>《文化苦旅》的文化网络与空间轨迹研究</title>
+  <!-- 引入依赖：Tailwind CSS（样式）、图标库、ECharts（可视化） -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <script src="https://cdn.bootcdn.net/ajax/libs/echarts/5.4.3/echarts.min.js"></script>
+  <style>
+    html, body { height: 100%; margin: 0; }
+    /*背景图设置*/
+    body {
+      background-image: url("images/2.jpg");
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-position: center;
+      background-attachment: fixed;
+      position: relative;
+    }
+
+    /* 导航栏隐藏/显示动画 */
+    .top-nav {
+      position: fixed;
+      left: 0;
+      right: 0;
+      top: 0;
+      z-index: 40;
+      transition: transform 280ms ease, opacity 220ms ease;
+      will-change: transform, opacity;
+      transform: translateY(0);
+      opacity: 1;
+      backdrop-filter: blur(6px); 
+    }
+    .top-nav--hidden {
+      transform: translateY(-110%); /* 向上移出视口 */
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* 磨砂玻璃（frosted glass）效果：更亮、更柔和的半透明并加强模糊 */
+    .glass {
+      background: linear-gradient(
+        rgba(255,255,255,0.52),
+        rgba(255,255,255,0.48)
+      ); /* 轻微渐变让表面更自然 */
+      border: 1px solid rgba(255,255,255,0.65);     /* 明亮边缘 */
+      box-shadow: 0 8px 30px rgba(0,0,0,0.12);      /* 柔和阴影 */
+      border-radius: 12px;
+      -webkit-backdrop-filter: blur(12px) saturate(130%);
+      backdrop-filter: blur(12px) saturate(130%);   /* 更强的模糊（磨砂感） */
+      background-clip: padding-box;
+      min-width: 0;
+      color: #111827;
+    }
+
+    /* 便捷 padding 工具 */
+    .glass.p-4 { padding: 1rem; }
+    .glass.p-5 { padding: 1.25rem; }
+
+    /* 保证页面内容在导航下方不被遮挡（header height + margin） */
+    main { margin-top: 72px; } /* 若 header 高度不同，调整此值 */
+    header, main, footer { position: relative; z-index: 10; }
+  </style>
+</head>
+<body class="bg-gray-50">
+  <!-- 导航栏（替换原 sticky header） -->
+  <header class="top-nav py-4" style="background-color: #ffffff;">
+    <nav class="container mx-auto px-4 flex flex-wrap justify-between items-center">
+      <h1 class="text-3xl md:text-4xl font-bold text-black" style="font-family: 'STXingkai', '华文行楷', serif;">文化苦旅</h1>
+      <ul class="flex flex-wrap space-x-4 md:space-x-6 mt-2 md:mt-0">
+        <li><a href="jump/knowledge.html" class="hover:text-blue-300 transition-colors"> 知识图谱 </a></li>
+        <li><a href="jump/gis.html" class="hover:text-blue-300 transition-colors"> GIS地图 </a></li>
+        <li><a href="jump/heatmap.html" class="hover:text-blue-300 transition-colors"> 热力图 </a></li>
+        <li><a href="jump/reading.html" class="hover:text-blue-300 transition-colors"> 阅读分享 </a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- 主内容区 -->
+  <main class="container mx-auto px-4 py-8">
+    <!-- 系统简介：磨砂玻璃 -->
+    <section id="intro" class="mb-16 glass p-5">
+      <h2 class="text-2xl md:text-3xl font-bold mb-6 text-gray-800 border-b pb-2"> 《文化苦旅》的文化网络与空间轨迹研究 </h2>
+      <p class="text-gray-600 text-lg leading-relaxed"> 简介内容：对该网站的具体描述 </p>
+    </section>
+
+    <!-- place1,2,3,4 分别对应4个地名 -->
+    <section id="concepts" class="mb-16 glass p-5">
+      <h2 class="text-2xl md:text-3xl font-bold mb-6 text-gray-800 border-b pb-2"> 地点查看 </h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <a href="jump/place1.html" class="glass border border-gray-200 rounded-lg p-5 hover:shadow-lg cursor-pointer transition-shadow block">
+          <h3 class="text-xl font-bold text-blue-700"> 都江堰 </h3>
+          <p class="text-gray-500 mt-1"> 介绍 </p>
+          <span class="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded mt-3"> 概念分类标签 </span>
+        </a>
+
+        <a href="jump/place2.html" class="glass border border-gray-200 rounded-lg p-5 hover:shadow-lg cursor-pointer transition-shadow block">
+          <h3 class="text-xl font-bold text-blue-700"> 莫高窟 </h3>
+          <p class="text-gray-500 mt-1"> 介绍 </p>
+          <span class="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded mt-3"> 概念分类标签 </span>
+        </a>
+
+        <a href="jump/place3.html" class="glass border border-gray-200 rounded-lg p-5 hover:shadow-lg cursor-pointer transition-shadow block">
+          <h3 class="text-xl font-bold text-blue-700"> 地点三 </h3>
+          <p class="text-gray-500 mt-1"> 介绍 </p>
+          <span class="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded mt-3"> 概念分类标签 </span>
+        </a>
+
+        <a href="jump/place4.html" class="glass border border-gray-200 rounded-lg p-5 hover:shadow-lg cursor-pointer transition-shadow block">
+          <h3 class="text-xl font-bold text-blue-700"> 地点四 </h3>
+          <p class="text-gray-500 mt-1"> 介绍 </p>
+          <span class="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded mt-3"> 概念分类标签 </span>
+        </a>
+      </div>
+    </section>
+
+  <!-- 页脚：移除深色背景改为磨砂（如需保持深色可调整颜色） -->
+  <footer class="text-white py-6 glass">
+    <div class="container mx-auto px-4 text-center">
+      <p> © 2025 网站名称 版权所有 </p>
+      <p class="text-gray-400 text-sm mt-2"> 联系信息：3478049498@qq.com </p>
+    </div>
+  </footer>
+
+  <!-- 引入数据和JS逻辑 -->
+  <script src="data.json"></script>
+  <script>
+    // 1. 加载数据（从data.json获取，需确保数据格式匹配）
+    const allData = window.conceptData || {};
+
+    // 2. 点击概念卡片显示详情
+    function showDetail(key) {
+      const data = allData[key];
+      if (!data) return;
+
+      // 填充详情内容
+      document.getElementById('detail-title').textContent = data.title;
+      document.getElementById('detail-explain').textContent = data.explain;
+
+      // 填充表格内容
+      let tableHtml = '';
+      data.tableData.forEach(item => {
+        tableHtml += `
+          <tr>
+            <td class="border border-gray-300 px-4 py-3"> ${item.col1} </td>
+            <td class="border border-gray-300 px-4 py-3"> ${item.col2} </td>
+            <td class="border border-gray-300 px-4 py-3"> ${item.col3} </td>
+            <td class="border border-gray-300 px-4 py-3"> ${item.col4} </td>
+          </tr>
+        `;
+      });
+      document.getElementById('detail-table').innerHTML = tableHtml;
+
+      // 显示详情区并平滑滚动
+      document.getElementById('detail-section').classList.remove('hidden');
+      document.getElementById('detail-section').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // 3. 初始化ECharts可视化图表
+    window.onload = function() {
+      // 图表1：概念关系图（树状图示例）
+      const chart1 = echarts.init(document.getElementById('chart1'));
+      const chart1Option = {
+        title: { text: '{{图表1标题}}', left: 'center' },
+        tooltip: { trigger: 'item' },
+        series: [{
+          type: 'tree',
+          data: [{{图表1数据，按ECharts格式填充}}],
+          label: { position: 'left' },
+          expandAndCollapse: true,
+          animationDuration: 500
+        }]
+      };
+      chart1.setOption(chart1Option);
+
+      // 图表2：统计图表（柱状图示例）
+      const chart2 = echarts.init(document.getElementById('chart2'));
+      const chart2Option = {
+        title: { text: '{{图表2标题}}', left: 'center' },
+        xAxis: { type: 'category', data: {{x轴数据数组}} },
+        yAxis: { type: 'value' },
+        series: [{
+          type: 'bar',
+          data: {{y轴数据数组}},
+          itemStyle: { color: '#4299e1' }
+        }]
+      };
+      chart2.setOption(chart2Option);
+
+      // 窗口缩放时图表自适应
+      window.addEventListener('resize', () => {
+        chart1.resize();
+        chart2.resize();
+      });
+    };
+
+    <!-- 在 body 末尾添加：隐藏/显示导航的脚本 -->
+    (function(){
+      const header = document.querySelector('.top-nav');
+      if (!header) return;
+      let lastScroll = window.pageYOffset || document.documentElement.scrollTop;
+      let ticking = false;
+
+      function onScroll() {
+        const current = window.pageYOffset || document.documentElement.scrollTop;
+        const delta = current - lastScroll;
+
+        // 向下滚动且已超过阈值：隐藏；向上滚动：显示
+        if (Math.abs(delta) > 5) {
+          if (delta > 0 && current > 80) {
+            header.classList.add('top-nav--hidden');
+          } else {
+            header.classList.remove('top-nav--hidden');
+          }
+          lastScroll = current;
+        }
+        ticking = false;
+      }
+
+      window.addEventListener('scroll', () => {
+        if (!ticking) {
+          window.requestAnimationFrame(onScroll);
+          ticking = true;
+        }
+      }, { passive: true });
+
+      // 可选：在窗口大小改变时重新计算 main 顶部间距（确保内容不被遮挡）
+      window.addEventListener('resize', () => {
+        const h = header.getBoundingClientRect().height;
+        document.querySelector('main').style.marginTop = (h + 8) + 'px';
+      });
+      // 立即设置一次
+      document.querySelector('main').style.marginTop = (header.getBoundingClientRect().height + 8) + 'px';
+    })();
+  </script>
+</body>
+</html>
