@@ -12,7 +12,7 @@
     html, body { height: 100%; margin: 0; }
     /*背景图设置*/
     body {
-      background-image: url("images/2.jpg");
+      background-image: url("2.jpg");
       background-size: cover;
       background-repeat: no-repeat;
       background-position: center;
@@ -152,10 +152,10 @@
     <nav class="container mx-auto px-4 flex flex-wrap justify-between items-center">
       <h1 class="text-3xl md:text-4xl font-bold text-black" style="font-family: 'STXingkai', '华文行楷', serif;">文化苦旅</h1>
       <ul class="flex flex-wrap space-x-4 md:space-x-6 mt-2 md:mt-0">
-        <li><a href="jump/knowledge.html" class="hover:text-blue-300 transition-colors"> 知识图谱 </a></li>
-        <li><a href="jump/gis.html" class="hover:text-blue-300 transition-colors"> GIS地图 </a></li>
-        <li><a href="jump/heatmap.html" class="hover:text-blue-300 transition-colors"> 热力图 </a></li>
-        <li><a href="jump/reading.html" class="hover:text-blue-300 transition-colors"> 阅读分享 </a></li>
+        <li><a href="knowledge.html" class="hover:text-blue-300 transition-colors"> 知识图谱 </a></li>
+        <li><a href="gis.html" class="hover:text-blue-300 transition-colors"> GIS地图 </a></li>
+        <li><a href="heatmap.html" class="hover:text-blue-300 transition-colors"> 热力图 </a></li>
+        <li><a href="reading.html" class="hover:text-blue-300 transition-colors"> 阅读分享 </a></li>
       </ul>
     </nav>
   </header>
@@ -172,25 +172,25 @@
     <section id="concepts" class="mb-16 glass p-5">
       <h2 class="text-2xl md:text-3xl font-bold mb-6 text-gray-800 border-b pb-2"> 地点查看 </h2>
       <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        <a href="jump/place1.html" class="glass border border-gray-200 rounded-lg p-5 hover:shadow-lg cursor-pointer transition-shadow block">
+        <a href="place1.html" class="glass border border-gray-200 rounded-lg p-5 hover:shadow-lg cursor-pointer transition-shadow block">
           <h3 class="text-xl font-bold text-blue-700"> 都江堰 </h3>
           <p class="text-gray-500 mt-1"> 介绍 </p>
           <span class="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded mt-3"> 概念分类标签 </span>
         </a>
 
-        <a href="jump/place2.html" class="glass border border-gray-200 rounded-lg p-5 hover:shadow-lg cursor-pointer transition-shadow block">
+        <a href="place2.html" class="glass border border-gray-200 rounded-lg p-5 hover:shadow-lg cursor-pointer transition-shadow block">
           <h3 class="text-xl font-bold text-blue-700"> 莫高窟 </h3>
           <p class="text-gray-500 mt-1"> 介绍 </p>
           <span class="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded mt-3"> 概念分类标签 </span>
         </a>
 
-        <a href="jump/place3.html" class="glass border border-gray-200 rounded-lg p-5 hover:shadow-lg cursor-pointer transition-shadow block">
+        <a href="place3.html" class="glass border border-gray-200 rounded-lg p-5 hover:shadow-lg cursor-pointer transition-shadow block">
           <h3 class="text-xl font-bold text-blue-700"> 地点三 </h3>
           <p class="text-gray-500 mt-1"> 介绍 </p>
           <span class="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded mt-3"> 概念分类标签 </span>
         </a>
 
-        <a href="jump/place4.html" class="glass border border-gray-200 rounded-lg p-5 hover:shadow-lg cursor-pointer transition-shadow block">
+        <a href="place4.html" class="glass border border-gray-200 rounded-lg p-5 hover:shadow-lg cursor-pointer transition-shadow block">
           <h3 class="text-xl font-bold text-blue-700"> 地点四 </h3>
           <p class="text-gray-500 mt-1"> 介绍 </p>
           <span class="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded mt-3"> 概念分类标签 </span>
@@ -207,38 +207,50 @@
   </footer>
 
   <!-- 引入数据和JS逻辑 -->
-  <script src="data.json"></script>
   <script>
-    // 1. 加载数据（从data.json获取，需确保数据格式匹配）
-    const allData = window.conceptData || {};
+    // 从 JSON 文件加载数据并通知页面
+    fetch('文化苦旅知识图谱完成版.json')
+      .then(res => res.json())
+      .then(data => { window.conceptData = data; document.dispatchEvent(new Event('conceptDataLoaded')); })
+      .catch(err => { console.error('加载数据失败', err); window.conceptData = {}; document.dispatchEvent(new Event('conceptDataLoaded')); });
+  </script>
+  <script>
+    // 等待数据加载完成再初始化依赖数据的函数
+    document.addEventListener('conceptDataLoaded', function() {
+      // 1. 加载数据（从JSON获取，见上方fetch）
+      const allData = window.conceptData || {};
 
-    // 2. 点击概念卡片显示详情
-    function showDetail(key) {
-      const data = allData[key];
-      if (!data) return;
+      // 2. 点击概念卡片显示详情
+      function showDetail(key) {
+        const data = allData[key];
+        if (!data) return;
 
-      // 填充详情内容
-      document.getElementById('detail-title').textContent = data.title;
-      document.getElementById('detail-explain').textContent = data.explain;
+        // 填充详情内容
+        document.getElementById('detail-title').textContent = data.title;
+        document.getElementById('detail-explain').textContent = data.explain;
 
-      // 填充表格内容
-      let tableHtml = '';
-      data.tableData.forEach(item => {
-        tableHtml += `
-          <tr>
-            <td class="border border-gray-300 px-4 py-3"> ${item.col1} </td>
-            <td class="border border-gray-300 px-4 py-3"> ${item.col2} </td>
-            <td class="border border-gray-300 px-4 py-3"> ${item.col3} </td>
-            <td class="border border-gray-300 px-4 py-3"> ${item.col4} </td>
-          </tr>
-        `;
-      });
-      document.getElementById('detail-table').innerHTML = tableHtml;
+        // 填充表格内容
+        let tableHtml = '';
+        data.tableData.forEach(item => {
+          tableHtml += `
+            <tr>
+              <td class="border border-gray-300 px-4 py-3"> ${item.col1} </td>
+              <td class="border border-gray-300 px-4 py-3"> ${item.col2} </td>
+              <td class="border border-gray-300 px-4 py-3"> ${item.col3} </td>
+              <td class="border border-gray-300 px-4 py-3"> ${item.col4} </td>
+            </tr>
+          `;
+        });
+        document.getElementById('detail-table').innerHTML = tableHtml;
 
-      // 显示详情区并平滑滚动
-      document.getElementById('detail-section').classList.remove('hidden');
-      document.getElementById('detail-section').scrollIntoView({ behavior: 'smooth' });
-    }
+        // 显示详情区并平滑滚动
+        document.getElementById('detail-section').classList.remove('hidden');
+        document.getElementById('detail-section').scrollIntoView({ behavior: 'smooth' });
+      }
+
+      // 将 showDetail 暴露到全局（如果页面有其他触发器需要访问）
+      window.showDetail = showDetail;
+    });
 
     // 3. 初始化ECharts可视化图表
     window.onload = function() {

@@ -1,22 +1,382 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>热力图</title>
-  <style>html,body{margin:0;font-family:system-ui,Segoe UI,Roboto,Arial;background:#f5f7fb}.container{max-width:980px;margin:24px auto;padding:16px}.glass{background:linear-gradient(rgba(255,255,255,0.52),rgba(255,255,255,0.48));border:1px solid rgba(255,255,255,0.65);box-shadow:0 8px 30px rgba(0,0,0,0.08);border-radius:12px;padding:18px}a.back{display:inline-block;margin-bottom:12px;color:#1e40af;text-decoration:none}.images img{width:100%;border-radius:8px;object-fit:cover;margin-bottom:12px}</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>热力图 + 点位图层（可交互）</title>
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
+
+  <style>
+    html, body { height: 100%; margin: 0; }
+    /* Ensure header doesn't get covered by the map */
+    #map { height: calc(100% - 72px); width: 100%; }
+
+    .top-nav {
+      position: fixed;
+      left: 0;
+      right: 0;
+      top: 0;
+      z-index: 40;
+      transition: transform 280ms ease, opacity 220ms ease;
+      will-change: transform, opacity;
+      transform: translateY(0);
+      opacity: 1;
+      backdrop-filter: blur(6px);
+      background-color: rgba(255,255,255,0.92);
+    }
+    body { padding-top: 72px; } /* ensure page content sits below header */
+
+    .panel {
+      position: fixed;
+      top: calc(72px + 12px); left: 12px; /* place just below header */
+      z-index: 1000;
+      background: rgba(255,255,255,0.96);
+      border: 1px solid #e6e6e6;
+      border-radius: 14px;
+      box-shadow: 0 10px 26px rgba(0,0,0,0.14);
+      padding: 12px 12px 10px;
+      width: 360px;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
+    }
+
+    .panel h1 {
+      font-size: 14px;
+      margin: 0 0 10px 0;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .pill {
+      display:inline-block;
+      padding: 2px 10px;
+      border-radius: 999px;
+      background:#f2f2f2;
+      border:1px solid #e9e9e9;
+      font-size: 11px;
+      white-space: nowrap;
+      font-weight: 600;
+    }
+
+    .row { display: flex; align-items: center; gap: 10px; margin: 8px 0; }
+    .row label { font-size: 12px; color: #333; min-width: 92px; }
+    .row input[type="range"] { width: 190px; }
+    .row select, .row input[type="text"] {
+      width: 220px;
+      padding: 6px 8px;
+      border-radius: 12px;
+      border: 1px solid #ddd;
+      background: #fff;
+      outline: none;
+      font-size: 12px;
+    }
+
+    .toggles { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 6px; }
+    .toggle {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 12px; color: #222;
+      border: 1px solid #eee;
+      padding: 7px 10px;
+      border-radius: 12px;
+      background: #fafafa;
+      user-select: none;
+    }
+
+    .hint {
+      font-size: 11px;
+      color: #666;
+      margin-top: 8px;
+      line-height: 1.35;
+    }
+
+    .warn {
+      margin-top: 8px;
+      font-size: 11px;
+      color: #8a4b00;
+      background: #fff3e6;
+      border: 1px solid #ffd8ad;
+      padding: 8px 10px;
+      border-radius: 12px;
+      display: none;
+    }
+  </style>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-  <div class="container">
-    <a class="back" href="index.html">← 返回主页</a>
-    <div class="glass">
-      <h1>热力图</h1>
-      <div class="images">
-        <img src="images/heatmap-1.jpg" alt="热力图示意">
-      </div>
-      <p>第一段：热力图含义与用途说明。</p>
-      <p>第二段：数据来源与可交互说明。</p>
+
+<body class="bg-gray-50">
+  <!-- 顶部导航（和 index.html 一致风格，方便返回） -->
+  <header class="top-nav py-4">
+    <nav class="container mx-auto px-4 flex flex-wrap justify-between items-center">
+      <h1 class="text-2xl md:text-3xl font-bold text-black" style="font-family:'STXingkai','华文行楷',serif;">
+        文化苦旅 · 热力图
+      </h1>
+      <ul class="flex flex-wrap space-x-4 md:space-x-6 mt-2 md:mt-0">
+        <li><a href="knowledge.html" class="hover:text-blue-500 transition-colors">知识图谱</a></li>
+        <li><a href="gis.html" class="hover:text-blue-500 transition-colors">GIS地图</a></li>
+        <li><a href="index.html" class="hover:text-blue-500 transition-colors">返回主页</a></li>
+        <li><a href="reading.html" class="hover:text-blue-500 transition-colors">阅读分享</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <div id="map"></div>
+
+  <div class="panel">
+    <h1>
+      <span>热力图 + 点位图层</span>
+      <span class="pill" id="countPill">0 点</span>
+    </h1>
+
+    <div class="toggles">
+      <label class="toggle"><input id="toggleHeat" type="checkbox" checked> 热力图</label>
+      <label class="toggle"><input id="toggleMarkers" type="checkbox" checked> 代表点标记</label>
+      <label class="toggle"><input id="toggleShp" type="checkbox" checked> Shapefile图层</label>
     </div>
+
+    <div class="row">
+      <label for="tierSelect">梯队筛选</label>
+      <select id="tierSelect">
+        <option value="all">全部</option>
+      </select>
+    </div>
+
+    <div class="row">
+      <label for="searchBox">地点搜索</label>
+      <input id="searchBox" type="text" placeholder="输入地点名称/代表点（例如：杭州/西湖/黄冈）" />
+    </div>
+
+    <div class="row">
+      <label for="radiusRange">半径 radius</label>
+      <input id="radiusRange" type="range" min="5" max="60" value="22" />
+      <span id="radiusVal" style="font-size:12px;">22</span>
+    </div>
+
+    <div class="row">
+      <label for="blurRange">模糊 blur</label>
+      <input id="blurRange" type="range" min="5" max="50" value="18" />
+      <span id="blurVal" style="font-size:12px;">18</span>
+    </div>
+
+    <div class="row">
+      <label for="maxZoomRange">maxZoom</label>
+      <input id="maxZoomRange" type="range" min="1" max="18" value="12" />
+      <span id="maxZoomVal" style="font-size:12px;">12</span>
+    </div>
+
+    <div class="warn" id="fileWarn">
+      你正在用 <b>file://</b> 方式直接打开 HTML。<br/>
+      由于浏览器安全策略，可能导致 GeoJSON / 资源加载失败。<br/>
+      建议用本地服务器打开：<br/>
+      <b>python -m http.server 8000</b>，然后访问 <b>http://localhost:8000/index.html</b>
+    </div>
+
   </div>
+
+  <!-- 点数据 -->
+  <script src="./heat_points.js"></script>
+
+  <script>
+    if (location.protocol === 'file:') {
+      document.getElementById('fileWarn').style.display = 'block';
+    }
+
+    // 地图
+    const map = L.map('map', { preferCanvas: true });
+
+    const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    // UI
+    const tierSelect = document.getElementById('tierSelect');
+    const searchBox = document.getElementById('searchBox');
+    const toggleHeat = document.getElementById('toggleHeat');
+    const toggleMarkers = document.getElementById('toggleMarkers');
+    const toggleShp = document.getElementById('toggleShp');
+
+    // 填充梯队
+    (function fillTierOptions() {
+      const tiers = Array.from(new Set(HEAT_POINTS.map(p => Number(p.tier)))).sort((a,b)=>a-b);
+      for (const t of tiers) {
+        const any = HEAT_POINTS.find(p => Number(p.tier) === t);
+        const opt = document.createElement('option');
+        opt.value = String(t);
+        opt.textContent = `${t} - ${(any?.tierName ?? '')}`.trim();
+        tierSelect.appendChild(opt);
+      }
+    })();
+
+    function normalize(s) {
+      return (s ?? '').toString().trim().toLowerCase();
+    }
+
+    function getFilteredPoints() {
+      const tier = tierSelect.value;
+      const q = normalize(searchBox.value);
+      return HEAT_POINTS.filter(p => {
+        const okTier = (tier === 'all') ? true : (Number(p.tier) === Number(tier));
+        if (!okTier) return false;
+        if (!q) return true;
+        const hay = normalize(`${p.name} ${p.rep} ${p.type} ${p.tierName}`);
+        return hay.includes(q);
+      });
+    }
+
+    function toHeatTriples(points) {
+      return points.map(p => [Number(p.lat), Number(p.lon), Number(p.w)]);
+    }
+
+    let heatLayer = null;
+    let markerLayer = L.layerGroup().addTo(map);
+
+    // Shapefile(GeoJSON)图层
+    let shpLayer = null;
+    let shpData = null;
+
+    function makePopupHTML(p) {
+      return `
+        <div style="font-size:12px;line-height:1.45;min-width:220px">
+          <div><b>${p.name}</b>（${p.type}）</div>
+          <div>代表点：${p.rep}</div>
+          <div>梯队：${p.tier} - ${p.tierName}</div>
+          <div>频次：<b>${p.w}</b></div>
+          <div style="color:#666">(${Number(p.lat).toFixed(5)}, ${Number(p.lon).toFixed(5)})</div>
+        </div>
+      `;
+    }
+
+    function buildHeatLayer(points) {
+      const radius = Number(document.getElementById('radiusRange').value);
+      const blur = Number(document.getElementById('blurRange').value);
+      const maxZoom = Number(document.getElementById('maxZoomRange').value);
+      return L.heatLayer(toHeatTriples(points), { radius, blur, maxZoom });
+    }
+
+    function rebuildMarkerLayer(points) {
+      markerLayer.clearLayers();
+      for (const p of points) {
+        const m = L.circleMarker([p.lat, p.lon], {
+          radius: 5,
+          weight: 1,
+          fillOpacity: 0.85
+        });
+        m.bindPopup(makePopupHTML(p));
+        m.addTo(markerLayer);
+      }
+    }
+
+    function updateCount(points) {
+      document.getElementById('countPill').textContent = `${points.length} 点`;
+    }
+
+    function fitToPoints(points) {
+      if (!points.length) return;
+      const latlngs = points.map(p => L.latLng(p.lat, p.lon));
+      const bounds = L.latLngBounds(latlngs);
+      map.fitBounds(bounds.pad(0.2));
+    }
+
+    function refresh() {
+      const points = getFilteredPoints();
+      updateCount(points);
+
+      // heat
+      if (heatLayer) {
+        map.removeLayer(heatLayer);
+        heatLayer = null;
+      }
+      if (toggleHeat.checked) {
+        heatLayer = buildHeatLayer(points);
+        heatLayer.addTo(map);
+      }
+
+      // markers
+      if (toggleMarkers.checked) {
+        if (!map.hasLayer(markerLayer)) markerLayer.addTo(map);
+        rebuildMarkerLayer(points);
+      } else {
+        if (map.hasLayer(markerLayer)) map.removeLayer(markerLayer);
+      }
+
+      // shp
+      if (shpLayer) {
+        if (toggleShp.checked) {
+          if (!map.hasLayer(shpLayer)) shpLayer.addTo(map);
+        } else {
+          if (map.hasLayer(shpLayer)) map.removeLayer(shpLayer);
+        }
+      }
+
+      // view
+      if (points.length > 1) fitToPoints(points);
+      else if (points.length === 1) map.setView([points[0].lat, points[0].lon], 10);
+    }
+
+    function bindRange(id, labelId) {
+      const el = document.getElementById(id);
+      const lab = document.getElementById(labelId);
+      lab.textContent = el.value;
+      el.addEventListener('input', () => { lab.textContent = el.value; });
+      el.addEventListener('change', refresh);
+    }
+    bindRange('radiusRange', 'radiusVal');
+    bindRange('blurRange', 'blurVal');
+    bindRange('maxZoomRange', 'maxZoomVal');
+
+    tierSelect.addEventListener('change', refresh);
+    toggleHeat.addEventListener('change', refresh);
+    toggleMarkers.addEventListener('change', refresh);
+    toggleShp.addEventListener('change', refresh);
+
+    // 搜索：输入时做轻量 debounce
+    let tmr = null;
+    searchBox.addEventListener('input', () => {
+      clearTimeout(tmr);
+      tmr = setTimeout(refresh, 180);
+    });
+
+    // 加载 GeoJSON（由本地 shp 转换而来）
+    fetch('./heat_points_layer.geojson')
+      .then(r => r.json())
+      .then(gj => {
+        shpData = gj;
+        shpLayer = L.geoJSON(shpData, {
+          style: () => ({ weight: 2, fillOpacity: 0.08 }),
+          onEachFeature: (feature, layer) => {
+            const props = feature.properties || {};
+            // 尽量展示主要字段
+            const keys = Object.keys(props);
+            let rows = '';
+            for (const k of keys.slice(0, 20)) {
+              rows += `<tr><td style="padding:2px 6px;border-bottom:1px solid #eee;color:#555">${k}</td><td style="padding:2px 6px;border-bottom:1px solid #eee">${props[k]}</td></tr>`;
+            }
+            const html = `
+              <div style="font-size:12px;line-height:1.4;max-width:320px">
+                <div style="font-weight:700;margin-bottom:6px">Shapefile 属性</div>
+                <table style="border-collapse:collapse;width:100%">${rows}</table>
+                ${keys.length>20 ? `<div style="color:#666;margin-top:6px">（仅显示前 20 个字段）</div>` : ``}
+              </div>
+            `;
+            layer.bindPopup(html);
+          }
+        });
+
+        if (toggleShp.checked) shpLayer.addTo(map);
+      })
+      .catch(err => {
+        console.warn('GeoJSON 加载失败：', err);
+        // 不阻塞主功能
+      })
+      .finally(() => {
+        // 首次渲染
+        refresh();
+      });
+  </script>
 </body>
 </html>

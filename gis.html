@@ -1,22 +1,223 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>GIS地图</title>
-  <style>/* 同上可复用样式或外链 */html,body{margin:0;font-family:system-ui,Segoe UI,Roboto,Arial;background:#f5f7fb}.container{max-width:980px;margin:24px auto;padding:16px}.glass{background:linear-gradient(rgba(255,255,255,0.52),rgba(255,255,255,0.48));border:1px solid rgba(255,255,255,0.65);box-shadow:0 8px 30px rgba(0,0,0,0.08);border-radius:12px;padding:18px}a.back{display:inline-block;margin-bottom:12px;color:#1e40af;text-decoration:none}.images img{width:100%;border-radius:8px;object-fit:cover;margin-bottom:12px}</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>GIS 交互地图（本地可打开）</title>
+
+  <!-- Leaflet -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- Optional: MiniMap / Scale etc could be added later -->
+  <style>
+    html, body { height: 100%; margin: 0; }
+    #map { height: calc(100% - 72px); width: 100%; }
+    .legend {
+      background: rgba(255,255,255,0.92);
+      padding: 10px 12px;
+      border-radius: 10px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+      font-family: system-ui, -apple-system, "Segoe UI", Arial, "PingFang SC", "Microsoft YaHei", sans-serif;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    .legend h3 {
+      margin: 0 0 6px 0;
+      font-size: 14px;
+    }
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      margin-left: 6px;
+      background: #f2f3f5;
+    }
+    .hint {
+      opacity: 0.75;
+      margin-top: 6px;
+      font-size: 12px;
+    }
+  </style>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* Ensure map sits below fixed header */
+    .top-nav {
+      position: fixed;
+      left: 0;
+      right: 0;
+      top: 0;
+      z-index: 40;
+      transition: transform 280ms ease, opacity 220ms ease;
+      will-change: transform, opacity;
+      transform: translateY(0);
+      opacity: 1;
+      backdrop-filter: blur(6px);
+      background-color: rgba(255,255,255,0.92);
+    }
+    body { padding-top: 72px; } /* 保证地图不被导航遮挡，可根据需要调整 */
+  </style>
 </head>
-<body>
-  <div class="container">
-    <a class="back" href="index.html">← 返回主页</a>
-    <div class="glass">
-      <h1>GIS地图</h1>
-      <div class="images">
-        <img src="images/gis-1.jpg" alt="GIS地图示意">
-      </div>
-      <p>第一段：GIS地理信息展示说明。</p>
-      <p>第二段：地图交互、图层或数据描述。</p>
-    </div>
-  </div>
+<body class="bg-gray-50">
+  <!-- 顶部导航（和 index.html 一致风格，方便返回） -->
+  <header class="top-nav py-4" style="background-color: #ffffff;">
+    <nav class="container mx-auto px-4 flex flex-wrap justify-between items-center">
+      <h1 class="text-2xl md:text-3xl font-bold text-black" style="font-family:'STXingkai','华文行楷',serif;">
+        文化苦旅 · GIS地图
+      </h1>
+      <ul class="flex flex-wrap space-x-4 md:space-x-6 mt-2 md:mt-0">
+        <li><a href="knowledge.html" class="hover:text-blue-500 transition-colors">知识图谱</a></li>
+        <li><a href="index.html" class="hover:text-blue-500 transition-colors">GIS地图</a></li>
+        <li><a href="heatmap.html" class="hover:text-blue-500 transition-colors">热力图</a></li>
+        <li><a href="reading.html" class="hover:text-blue-500 transition-colors">阅读分享</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <div id="map"></div>
+
+  <script>
+    // ================
+    // 0) 重要说明
+    // ================
+    // 你现在看到的是“纯前端 + GeoJSON”方案：
+    // - 直接双击打开 index.html 就能看（同目录下 data/*.geojson）
+    // - 若你用 Chrome 直接打开本地文件时遇到跨域（CORS）导致 GeoJSON 读取失败：
+    //   ① 推荐：用 VSCode 的 Live Server 插件打开该文件夹
+    //   ② 或：Python 简易服务器：在本目录运行 `python -m http.server 8000`
+    //      然后访问 http://localhost:8000/index.html
+
+    // ================
+    // 1) 初始化地图
+    // ================
+    const map = L.map("map", { zoomControl: true }).setView([35, 105], 4);
+
+    // 底图（在线瓦片）
+    const osm = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      maxZoom: 19,
+      attribution: "© OpenStreetMap"
+    }).addTo(map);
+
+    // ================
+    // 2) 通用工具
+    // ================
+    function propsToHtml(props) {
+      if (!props) return "<i>无属性</i>";
+      const rows = Object.entries(props).map(([k, v]) => {
+        const val = (v === null || v === undefined || v === "") ? "-" : String(v);
+        return `<tr><td style="padding:4px 8px;color:#444;"><b>${k}</b></td><td style="padding:4px 8px;">${val}</td></tr>`;
+      }).join("");
+      return `<table style="border-collapse:collapse;">${rows}</table>`;
+    }
+
+    function fitIfNotEmpty(layer) {
+      try {
+        const b = layer.getBounds();
+        if (b && b.isValid()) map.fitBounds(b.pad(0.12));
+      } catch(e) {}
+    }
+
+    // 颜色与样式（你的数据里：人生/世界/中国 都是 LineString；路线点位是 Point）
+    const styles = {
+      "人生":   { color: "#2b6cb0", weight: 4, opacity: 0.9 },
+      "世界":   { color: "#718096", weight: 2, opacity: 0.9, dashArray: "4,6" },
+      "中国":   { color: "#c53030", weight: 2.5, opacity: 0.95 },
+    };
+
+    // ================
+    // 3) 加载 GeoJSON 图层
+    // ================
+    async function loadGeoJSON(name, url) {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`${name} 加载失败：${res.status}`);
+      const data = await res.json();
+
+      let layer;
+      if (name === "路线点位") {
+        layer = L.geoJSON(data, {
+          pointToLayer: (feature, latlng) => L.circleMarker(latlng, {
+            radius: 6,
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 0.85
+          }),
+          onEachFeature: (feature, lyr) => {
+            lyr.bindPopup(`<div style="min-width:220px"><b>${name}</b><div class="hint">点击查看属性</div>${propsToHtml(feature.properties)}</div>`);
+          }
+        });
+      } else {
+        layer = L.geoJSON(data, {
+          style: styles[name] || { weight: 2, opacity: 0.9 },
+          onEachFeature: (feature, lyr) => {
+            lyr.bindPopup(`<div style="min-width:220px"><b>${name}</b><div class="hint">点击查看属性</div>${propsToHtml(feature.properties)}</div>`);
+          }
+        });
+      }
+      return layer;
+    }
+
+    // ================
+    // 4) 图层控制 + 初始加载
+    // ================
+    const overlayLayers = {};
+    const loadOrder = [
+      ["世界", "世界.geojson"],
+      ["中国", "中国.geojson"],
+      ["人生", "人生.geojson"],
+      ["路线点位", "路线点位.geojson"],
+    ];
+
+    (async () => {
+      let firstBoundsLayer = null;
+
+      for (const [name, url] of loadOrder) {
+        try {
+          const lyr = await loadGeoJSON(name, url);
+          overlayLayers[name] = lyr;
+
+          // 默认全部显示
+          lyr.addTo(map);
+
+          if (!firstBoundsLayer) firstBoundsLayer = lyr;
+        } catch (err) {
+          console.error(err);
+          alert(String(err));
+        }
+      }
+
+      // 图层控制（可开关）
+      L.control.layers(
+        { "OpenStreetMap": osm },
+        overlayLayers,
+        { collapsed: false }
+      ).addTo(map);
+
+      // 自动视野（优先根据“路线点位”，否则取第一个有效图层）
+      if (overlayLayers["路线点位"]) {
+        fitIfNotEmpty(overlayLayers["路线点位"]);
+      } else if (firstBoundsLayer) {
+        fitIfNotEmpty(firstBoundsLayer);
+      }
+    })();
+
+    // ================
+    // 5) 图例
+    // ================
+    const legend = L.control({ position: "topright" });
+    legend.onAdd = function () {
+      const div = L.DomUtil.create("div", "legend");
+      div.innerHTML = `
+        <h3>图层说明 <span class="badge">交互</span></h3>
+        <div>路线点位：点要素</div>
+        <div>人生：中国主题线路</div>
+        <div>中国：行政边界/线</div>
+        <div>世界：</div>
+        <div class="hint">提示：左上可切换图层；鼠标滚轮缩放。</div>
+      `;
+      return div;
+    };
+    legend.addTo(map);
+  </script>
 </body>
 </html>

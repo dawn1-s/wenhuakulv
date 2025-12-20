@@ -12,7 +12,7 @@
   <style>
     html, body { height: 100%; margin: 0; }
     body {
-      background-image: url("../images/2.jpg");
+      background-image: url("2.jpg");
       background-size: cover;
       background-repeat: no-repeat;
       background-position: center;
@@ -54,7 +54,7 @@
         文化苦旅 · 知识图谱
       </h1>
       <ul class="flex flex-wrap space-x-4 md:space-x-6 mt-2 md:mt-0">
-        <li><a href="../index.html" class="hover:text-blue-500 transition-colors">返回主页</a></li>
+        <li><a href="index.html" class="hover:text-blue-500 transition-colors">返回主页</a></li>
         <li><a href="gis.html" class="hover:text-blue-500 transition-colors">GIS地图</a></li>
         <li><a href="heatmap.html" class="hover:text-blue-500 transition-colors">热力图</a></li>
         <li><a href="reading.html" class="hover:text-blue-500 transition-colors">阅读分享</a></li>
@@ -69,7 +69,7 @@
         <div class="w-full lg:w-3/4">
           <div class="flex flex-col md:flex-row gap-3 items-start md:items-center mb-3">
             <div class="flex-1 w-full">
-              <label class="text-sm text-gray-700">节点搜索（按 name）</label>
+              <label class="text-sm text-gray-700">节点搜索</label>
               <input id="searchInput" class="w-full mt-1 px-3 py-2 rounded border border-gray-200"
                      placeholder="例如：都江堰 / 苏轼 / 岳麓书院 ..." />
             </div>
@@ -83,7 +83,7 @@
           <div id="graph" class="rounded-lg"></div>
 
           <div class="mt-3 text-xs text-gray-600">
-            提示：可拖拽节点、滚轮缩放；点击节点/边在右侧查看详情（模拟 Neo4j 的“点选查看属性”体验）。
+            提示：可拖拽节点、滚轮缩放；点击节点/边在右侧查看详情。
           </div>
         </div>
 
@@ -107,7 +107,7 @@
 
   <script>
     // ====== 1) 配置：你的 JSON 路径（按你放置的实际路径改）======
-    const JSON_PATH = "../data/文化苦旅知识图谱完成版.json";
+    const JSON_PATH = "graph.json";
 
     // ====== 2) 工具函数：安全 stringify ======
     function pretty(obj) {
@@ -327,7 +327,11 @@
     // ====== 7) 加载 JSON 并启动 ======
     async function init() {
       try {
-        const res = await fetch(JSON_PATH);
+        // ✅ 用 new URL 计算绝对地址
+        const jsonUrl = new URL(JSON_PATH, window.location.href);
+
+        // ✅ 再 encode 一下，处理中文文件名/特殊字符
+        const res = await fetch(encodeURI(jsonUrl.toString()));
         if (!res.ok) throw new Error("JSON加载失败：" + res.status);
         const raw = await res.json();
 
