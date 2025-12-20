@@ -12,7 +12,7 @@
     html, body { height: 100%; margin: 0; }
     /*背景图设置*/
     body {
-      background-image: url("2.jpg");
+      background-image: url("images/2.jpg");
       background-size: cover;
       background-repeat: no-repeat;
       background-position: center;
@@ -62,18 +62,100 @@
     /* 保证页面内容在导航下方不被遮挡（header height + margin） */
     main { margin-top: 72px; } /* 若 header 高度不同，调整此值 */
     header, main, footer { position: relative; z-index: 10; }
+
+    /* ====== 开场动画遮罩 ====== */
+    #intro-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: radial-gradient(circle at 50% 40%, rgba(30,30,30,0.65), rgba(10,10,10,0.82));
+      backdrop-filter: blur(6px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 1;
+    }
+
+    #intro-overlay.hidden {
+      display: none;
+    }
+
+    #intro-overlay.fade-out {
+      animation: overlayFadeOut 1.2s ease forwards;
+    }
+
+    .intro-content {
+      text-align: center;
+      color: #f9fafb;
+      padding: 0 20px;
+    }
+
+    /* 标题风格 */
+    .intro-title {
+      font-family: "STXingkai", "华文行楷", serif;
+      font-size: clamp(2.6rem, 5vw, 3.8rem);
+      letter-spacing: 0.22em;
+      margin-bottom: 0.9rem;
+      filter: drop-shadow(0 10px 18px rgba(0,0,0,0.35));
+    }
+
+    /* 副标题风格 */
+    .intro-subtitle {
+      font-size: 0.95rem;
+      letter-spacing: 0.28em;
+      opacity: 0.92;
+    }
+
+    /* ====== 逐字浮现：每个字 ====== */
+    .intro-char {
+      display: inline-block;
+      opacity: 0;
+      transform: translateY(14px);
+      filter: blur(2px);
+      animation: charIn 720ms ease forwards;
+    }
+
+    /* “水墨”一点：第一个字稍微更慢更柔 */
+    .intro-char.is-first {
+      animation-duration: 900ms;
+    }
+
+    /* 动画：字出现 */
+    @keyframes charIn {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+        filter: blur(0);
+      }
+    }
+
+    /* 遮罩淡出 */
+    @keyframes overlayFadeOut {
+      to {
+        opacity: 0;
+        visibility: hidden;
+      }
+    }
   </style>
 </head>
 <body class="bg-gray-50">
+  <!-- 开场动画（首次访问播放） -->
+  <div id="intro-overlay" class="hidden">
+    <div class="intro-content">
+      <!-- 逐字浮现：把文本放到 data-text 里 -->
+      <h1 id="intro-title" class="intro-title" data-text="文化苦旅"></h1>
+      <p id="intro-subtitle" class="intro-subtitle" data-text="Knowledge Graph & Spatial Narrative"></p>
+    </div>
+  </div>
   <!-- 导航栏（替换原 sticky header） -->
   <header class="top-nav py-4" style="background-color: #ffffff;">
     <nav class="container mx-auto px-4 flex flex-wrap justify-between items-center">
       <h1 class="text-3xl md:text-4xl font-bold text-black" style="font-family: 'STXingkai', '华文行楷', serif;">文化苦旅</h1>
       <ul class="flex flex-wrap space-x-4 md:space-x-6 mt-2 md:mt-0">
-        <li><a href="knowledge.html" class="hover:text-blue-300 transition-colors"> 知识图谱 </a></li>
-        <li><a href="gis.html" class="hover:text-blue-300 transition-colors"> GIS地图 </a></li>
-        <li><a href="heatmap.html" class="hover:text-blue-300 transition-colors"> 热力图 </a></li>
-        <li><a href="reading.html" class="hover:text-blue-300 transition-colors"> 阅读分享 </a></li>
+        <li><a href="jump/knowledge.html" class="hover:text-blue-300 transition-colors"> 知识图谱 </a></li>
+        <li><a href="jump/gis.html" class="hover:text-blue-300 transition-colors"> GIS地图 </a></li>
+        <li><a href="jump/heatmap.html" class="hover:text-blue-300 transition-colors"> 热力图 </a></li>
+        <li><a href="jump/reading.html" class="hover:text-blue-300 transition-colors"> 阅读分享 </a></li>
       </ul>
     </nav>
   </header>
@@ -90,25 +172,25 @@
     <section id="concepts" class="mb-16 glass p-5">
       <h2 class="text-2xl md:text-3xl font-bold mb-6 text-gray-800 border-b pb-2"> 地点查看 </h2>
       <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        <a href="place1.html" class="glass border border-gray-200 rounded-lg p-5 hover:shadow-lg cursor-pointer transition-shadow block">
+        <a href="jump/place1.html" class="glass border border-gray-200 rounded-lg p-5 hover:shadow-lg cursor-pointer transition-shadow block">
           <h3 class="text-xl font-bold text-blue-700"> 都江堰 </h3>
           <p class="text-gray-500 mt-1"> 介绍 </p>
           <span class="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded mt-3"> 概念分类标签 </span>
         </a>
 
-        <a href="place2.html" class="glass border border-gray-200 rounded-lg p-5 hover:shadow-lg cursor-pointer transition-shadow block">
+        <a href="jump/place2.html" class="glass border border-gray-200 rounded-lg p-5 hover:shadow-lg cursor-pointer transition-shadow block">
           <h3 class="text-xl font-bold text-blue-700"> 莫高窟 </h3>
           <p class="text-gray-500 mt-1"> 介绍 </p>
           <span class="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded mt-3"> 概念分类标签 </span>
         </a>
 
-        <a href="place3.html" class="glass border border-gray-200 rounded-lg p-5 hover:shadow-lg cursor-pointer transition-shadow block">
+        <a href="jump/place3.html" class="glass border border-gray-200 rounded-lg p-5 hover:shadow-lg cursor-pointer transition-shadow block">
           <h3 class="text-xl font-bold text-blue-700"> 地点三 </h3>
           <p class="text-gray-500 mt-1"> 介绍 </p>
           <span class="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded mt-3"> 概念分类标签 </span>
         </a>
 
-        <a href="place4.html" class="glass border border-gray-200 rounded-lg p-5 hover:shadow-lg cursor-pointer transition-shadow block">
+        <a href="jump/place4.html" class="glass border border-gray-200 rounded-lg p-5 hover:shadow-lg cursor-pointer transition-shadow block">
           <h3 class="text-xl font-bold text-blue-700"> 地点四 </h3>
           <p class="text-gray-500 mt-1"> 介绍 </p>
           <span class="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded mt-3"> 概念分类标签 </span>
@@ -235,11 +317,74 @@
       document.querySelector('main').style.marginTop = (header.getBoundingClientRect().height + 8) + 'px';
     })();
   </script>
+
+  <script>
+    (function () {
+      const KEY = "introPlayed_v1"; // 改版本号可以让它重新播放一次
+      const overlay = document.getElementById("intro-overlay");
+      const titleEl = document.getElementById("intro-title");
+      const subEl = document.getElementById("intro-subtitle");
+
+      if (!overlay || !titleEl || !subEl) return;
+
+      // 只在第一次访问播放
+      const played = localStorage.getItem(KEY) === "1";
+      if (played) {
+        overlay.classList.add("hidden");
+        return;
+      }
+
+      // 显示遮罩并锁滚动
+      overlay.classList.remove("hidden");
+      document.body.style.overflow = "hidden";
+
+      // 逐字渲染函数
+      function typeChars(el, text, baseDelay = 90, startDelay = 0) {
+        el.textContent = ""; // 清空
+        const chars = Array.from(text);
+
+        chars.forEach((ch, i) => {
+          const span = document.createElement("span");
+          span.className = "intro-char" + (i === 0 ? " is-first" : "");
+          span.textContent = ch;
+
+          // 每个字延迟不同 => 逐字浮现
+          span.style.animationDelay = (startDelay + i * baseDelay) + "ms";
+
+          el.appendChild(span);
+        });
+
+        // 返回总时长（粗略）
+        return startDelay + chars.length * baseDelay + 900;
+      }
+
+      // 取 data-text
+      const titleText = titleEl.getAttribute("data-text") || "";
+      const subText = subEl.getAttribute("data-text") || "";
+
+      // 执行逐字动画：标题先，副标题后
+      const tEnd = typeChars(titleEl, titleText, 140, 120);
+      const sEnd = typeChars(subEl, subText, 42, tEnd - 300);
+
+      // 总时长：副标题结束后再停一小会儿
+      const total = sEnd + 700;
+
+      // 淡出并解锁
+      window.addEventListener("load", () => {
+        setTimeout(() => {
+          overlay.classList.add("fade-out");
+        }, total - 900);
+
+        setTimeout(() => {
+          // 移除遮罩 & 解锁
+          overlay.classList.add("hidden");
+          document.body.style.overflow = "auto";
+
+          // 记住：以后不再播放
+          localStorage.setItem(KEY, "1");
+        }, total + 400);
+      });
+    })();
+  </script>
 </body>
-
 </html>
-
-
-
-
-
