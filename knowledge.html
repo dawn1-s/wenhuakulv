@@ -1,29 +1,374 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>知识图谱</title>
-  <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>知识图谱 - 《文化苦旅》</title>
+
+  <!-- 和你主页一致：Tailwind + ECharts -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.bootcdn.net/ajax/libs/echarts/5.4.3/echarts.min.js"></script>
+
   <style>
-    html,body{margin:0;font-family:system-ui,Segoe UI,Roboto,Arial;background:#f5f7fb}
-    .container{max-width:980px;margin:24px auto;padding:16px}
-    .glass{background:linear-gradient(rgba(255,255,255,0.52),rgba(255,255,255,0.48));border:1px solid rgba(255,255,255,0.65);box-shadow:0 8px 30px rgba(0,0,0,0.08);border-radius:12px;padding:18px}
-    a.back{display:inline-block;margin-bottom:12px;color:#1e40af;text-decoration:none}
-    .images img{width:100%;border-radius:8px;object-fit:cover;margin-bottom:12px}
+    html, body { height: 100%; margin: 0; }
+    body {
+      background-image: url("../images/2.jpg");
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-position: center;
+      background-attachment: fixed;
+    }
+    .glass {
+      background: linear-gradient(rgba(255,255,255,0.55), rgba(255,255,255,0.48));
+      border: 1px solid rgba(255,255,255,0.65);
+      box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+      border-radius: 12px;
+      -webkit-backdrop-filter: blur(12px) saturate(130%);
+      backdrop-filter: blur(12px) saturate(130%);
+      background-clip: padding-box;
+      color: #111827;
+    }
+    .top-nav {
+      position: fixed; left: 0; right: 0; top: 0;
+      z-index: 40;
+      transition: transform 280ms ease, opacity 220ms ease;
+      transform: translateY(0); opacity: 1;
+      backdrop-filter: blur(6px);
+      background-color: rgba(255,255,255,0.85);
+    }
+    .top-nav--hidden {
+      transform: translateY(-110%);
+      opacity: 0;
+      pointer-events: none;
+    }
+    main { margin-top: 80px; }
+    #graph { width: 100%; height: calc(100vh - 140px); }
   </style>
 </head>
-<body>
-  <div class="container">
-    <a class="back" href="index.html">← 返回主页</a>
-    <div class="glass">
-      <h1>知识图谱</h1>
-      <div class="images">
-        <img src="images/knowledge-1.jpg" alt="知识图谱示意">
+
+<body class="bg-gray-50">
+  <!-- 顶部导航（和 index.html 一致风格，方便返回） -->
+  <header class="top-nav py-4">
+    <nav class="container mx-auto px-4 flex flex-wrap justify-between items-center">
+      <h1 class="text-2xl md:text-3xl font-bold text-black" style="font-family:'STXingkai','华文行楷',serif;">
+        文化苦旅 · 知识图谱
+      </h1>
+      <ul class="flex flex-wrap space-x-4 md:space-x-6 mt-2 md:mt-0">
+        <li><a href="../index.html" class="hover:text-blue-500 transition-colors">返回主页</a></li>
+        <li><a href="gis.html" class="hover:text-blue-500 transition-colors">GIS地图</a></li>
+        <li><a href="heatmap.html" class="hover:text-blue-500 transition-colors">热力图</a></li>
+        <li><a href="reading.html" class="hover:text-blue-500 transition-colors">阅读分享</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main class="container mx-auto px-4 py-6">
+    <section class="glass p-4">
+      <div class="flex flex-col lg:flex-row gap-4">
+        <!-- 左侧：图 -->
+        <div class="w-full lg:w-3/4">
+          <div class="flex flex-col md:flex-row gap-3 items-start md:items-center mb-3">
+            <div class="flex-1 w-full">
+              <label class="text-sm text-gray-700">节点搜索（按 name）</label>
+              <input id="searchInput" class="w-full mt-1 px-3 py-2 rounded border border-gray-200"
+                     placeholder="例如：都江堰 / 苏轼 / 岳麓书院 ..." />
+            </div>
+
+            <div class="flex gap-2 mt-2 md:mt-6">
+              <button id="btnSearch" class="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700">定位</button>
+              <button id="btnReset" class="px-4 py-2 rounded bg-gray-700 text-white hover:bg-gray-800">重置视图</button>
+            </div>
+          </div>
+
+          <div id="graph" class="rounded-lg"></div>
+
+          <div class="mt-3 text-xs text-gray-600">
+            提示：可拖拽节点、滚轮缩放；点击节点/边在右侧查看详情（模拟 Neo4j 的“点选查看属性”体验）。
+          </div>
+        </div>
+
+        <!-- 右侧：详情面板（Neo4j 风格的 inspector） -->
+        <aside class="w-full lg:w-1/4">
+          <div class="glass p-4 h-full">
+            <h2 class="text-lg font-bold mb-2">详情</h2>
+            <div id="detailBox" class="text-sm text-gray-800 whitespace-pre-wrap">
+              请选择一个节点或关系…
+            </div>
+
+            <hr class="my-3 border-gray-200"/>
+
+            <h3 class="text-sm font-semibold mb-2">图谱统计</h3>
+            <div id="statBox" class="text-sm text-gray-700"></div>
+          </div>
+        </aside>
       </div>
-      <p>第一段：对知识图谱模块的说明。</p>
-      <p>第二段：可以放置方法、交互说明或数据来源等。</p>
-    </div>
-  </div>
+    </section>
+  </main>
+
+  <script>
+    // ====== 1) 配置：你的 JSON 路径（按你放置的实际路径改）======
+    const JSON_PATH = "../data/文化苦旅知识图谱完成版.json";
+
+    // ====== 2) 工具函数：安全 stringify ======
+    function pretty(obj) {
+      try { return JSON.stringify(obj, null, 2); } catch (e) { return String(obj); }
+    }
+
+    // ====== 3) 从 Neo4j 导出结构构建 nodes/links ======
+    function buildGraph(raw) {
+      const nodeMap = new Map(); // key: elementId 或 labels+name
+      const links = [];
+
+      function nodeKey(n) {
+        // 你的数据里有 elementId，优先用它（更稳）
+        if (n && n.elementId) return n.elementId;
+        const name = n?.properties?.name ?? "未命名";
+        const label = (n?.labels && n.labels.length) ? n.labels[0] : "未分类";
+        return `${label}:${name}`;
+      }
+
+      function upsertNode(n) {
+        if (!n) return null;
+        const key = nodeKey(n);
+        if (!nodeMap.has(key)) {
+          const labels = n.labels || [];
+          const props = n.properties || {};
+          nodeMap.set(key, {
+            id: key,
+            name: props.name || key,
+            labels,
+            properties: props,
+            category: labels.length ? labels[0] : "未分类",
+            // 初始大小可按类别简单区分，也可以按度数后面再算
+            symbolSize: 26
+          });
+        } else {
+          // 若同一节点后续出现更多 properties，可合并（避免丢字段）
+          const old = nodeMap.get(key);
+          const newProps = n.properties || {};
+          old.properties = { ...old.properties, ...newProps };
+          old.labels = Array.from(new Set([...(old.labels || []), ...(n.labels || [])]));
+          old.category = old.labels.length ? old.labels[0] : old.category;
+        }
+        return key;
+      }
+
+      for (const item of raw) {
+        const p = item?.p;
+        if (!p) continue;
+
+        // 你的每条记录有 start/end/segments[0].relationship
+        const startNode = p.start;
+        const endNode = p.end;
+        const rel = p.segments?.[0]?.relationship;
+
+        const sId = upsertNode(startNode);
+        const eId = upsertNode(endNode);
+        if (!sId || !eId || !rel) continue;
+
+        links.push({
+          source: sId,
+          target: eId,
+          type: rel.type || "关系",
+          // 关系自身也可能有 properties（你这里大多为空，但保留接口）
+          properties: rel.properties || {}
+        });
+      }
+
+      // 统计度数，调整 symbolSize，让“中心点”更像 Neo4j 的聚合效果
+      const degree = new Map();
+      for (const l of links) {
+        degree.set(l.source, (degree.get(l.source) || 0) + 1);
+        degree.set(l.target, (degree.get(l.target) || 0) + 1);
+      }
+      for (const n of nodeMap.values()) {
+        const d = degree.get(n.id) || 0;
+        n.symbolSize = Math.max(18, Math.min(60, 18 + d * 2));
+      }
+
+      // categories：按 labels[0] 分组
+      const categoriesMap = new Map();
+      for (const n of nodeMap.values()) {
+        const c = n.category || "未分类";
+        if (!categoriesMap.has(c)) categoriesMap.set(c, { name: c });
+      }
+
+      return {
+        nodes: Array.from(nodeMap.values()),
+        links,
+        categories: Array.from(categoriesMap.values())
+      };
+    }
+
+    // ====== 4) 渲染图（ECharts graph / force）======
+    const chart = echarts.init(document.getElementById("graph"));
+
+    function renderGraph(graphData) {
+      const option = {
+        tooltip: {
+          formatter: (params) => {
+            if (params.dataType === "node") {
+              const n = params.data;
+              const label = (n.labels && n.labels.length) ? n.labels.join(", ") : "未分类";
+              return `
+                <div style="max-width:320px;white-space:normal;">
+                  <div><b>${n.name}</b></div>
+                  <div style="opacity:.85;">labels：${label}</div>
+                </div>
+              `;
+            }
+            if (params.dataType === "edge") {
+              const e = params.data;
+              return `<b>${e.type}</b>`;
+            }
+            return "";
+          }
+        },
+        legend: [{
+          type: "scroll",
+          orient: "horizontal",
+          top: 8,
+          data: graphData.categories.map(c => c.name)
+        }],
+        series: [{
+          type: "graph",
+          layout: "force",
+          data: graphData.nodes,
+          links: graphData.links.map(l => ({
+            source: l.source,
+            target: l.target,
+            value: l.type,
+            type: l.type,
+            properties: l.properties
+          })),
+          categories: graphData.categories,
+          roam: true,
+          draggable: true,
+          focusNodeAdjacency: true,
+          label: { show: true, position: "right" },
+          edgeLabel: {
+            show: false
+          },
+          lineStyle: {
+            width: 1.2,
+            opacity: 0.8,
+            curveness: 0.15
+          },
+          force: {
+            // 可根据节点数量调
+            repulsion: 140,
+            edgeLength: 120,
+            gravity: 0.12
+          }
+        }]
+      };
+
+      chart.setOption(option);
+
+      // 统计信息
+      const statBox = document.getElementById("statBox");
+      statBox.textContent = `节点：${graphData.nodes.length}  条关系：${graphData.links.length}  类别：${graphData.categories.length}`;
+    }
+
+    // ====== 5) Neo4j 风格的“右侧详情面板”交互 ======
+    chart.on("click", (params) => {
+      const detailBox = document.getElementById("detailBox");
+
+      if (params.dataType === "node") {
+        const n = params.data;
+        detailBox.textContent =
+          `【节点】\n` +
+          `name: ${n.name}\n` +
+          `labels: ${(n.labels && n.labels.length) ? n.labels.join(", ") : "未分类"}\n\n` +
+          `properties:\n${pretty(n.properties)}`;
+      } else if (params.dataType === "edge") {
+        const e = params.data;
+        detailBox.textContent =
+          `【关系】\n` +
+          `type: ${e.type || e.value || "关系"}\n` +
+          `source: ${e.source}\n` +
+          `target: ${e.target}\n\n` +
+          `properties:\n${pretty(e.properties || {})}`;
+      }
+    });
+
+    // ====== 6) 搜索定位 ======
+    let cachedGraph = null;
+
+    function focusNodeByName(name) {
+      if (!cachedGraph) return;
+      const node = cachedGraph.nodes.find(n => String(n.name).trim() === String(name).trim());
+      if (!node) {
+        alert("未找到该节点，请检查输入是否与节点 name 完全一致。");
+        return;
+      }
+
+      // ECharts：通过 dispatchAction 高亮 + 居中
+      chart.dispatchAction({ type: "highlight", seriesIndex: 0, dataIndex: cachedGraph.nodes.indexOf(node) });
+      chart.dispatchAction({ type: "showTip", seriesIndex: 0, dataIndex: cachedGraph.nodes.indexOf(node) });
+
+      // 尝试居中：把当前视图移动到该点附近（近似）
+      // 注意：force 布局位置是动态的，ECharts 内部坐标不可直接取，这里用 dataZoom 类似手段不适用；
+      // 所以用“高亮+提示”即可达到定位效果。需要更强居中可做手动布局或改用 G6/Cytoscape。
+    }
+
+    document.getElementById("btnSearch").addEventListener("click", () => {
+      const v = document.getElementById("searchInput").value.trim();
+      if (!v) return;
+      focusNodeByName(v);
+    });
+
+    document.getElementById("btnReset").addEventListener("click", () => {
+      chart.dispatchAction({ type: "downplay", seriesIndex: 0 });
+      chart.setOption({}); // 清
+      renderGraph(cachedGraph);
+    });
+
+    // ====== 7) 加载 JSON 并启动 ======
+    async function init() {
+      try {
+        const res = await fetch(JSON_PATH);
+        if (!res.ok) throw new Error("JSON加载失败：" + res.status);
+        const raw = await res.json();
+
+        cachedGraph = buildGraph(raw);
+        renderGraph(cachedGraph);
+      } catch (err) {
+        document.getElementById("detailBox").textContent =
+          "加载失败：\n" + String(err) +
+          "\n\n请检查：\n1) JSON_PATH 路径是否正确\n2) 是否使用本地服务器打开（避免 file:// 跨域限制）";
+      }
+    }
+
+    window.addEventListener("resize", () => chart.resize());
+    init();
+
+    // ====== 8) 顶部导航滚动隐藏（和你主页相同思路）======
+    (function(){
+      const header = document.querySelector('.top-nav');
+      if (!header) return;
+      let lastScroll = window.pageYOffset || document.documentElement.scrollTop;
+      let ticking = false;
+
+      function onScroll() {
+        const current = window.pageYOffset || document.documentElement.scrollTop;
+        const delta = current - lastScroll;
+
+        if (Math.abs(delta) > 5) {
+          if (delta > 0 && current > 80) header.classList.add('top-nav--hidden');
+          else header.classList.remove('top-nav--hidden');
+          lastScroll = current;
+        }
+        ticking = false;
+      }
+
+      window.addEventListener('scroll', () => {
+        if (!ticking) {
+          window.requestAnimationFrame(onScroll);
+          ticking = true;
+        }
+      }, { passive: true });
+    })();
+  </script>
 </body>
 </html>
