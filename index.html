@@ -140,6 +140,7 @@
 </head>
 <body class="bg-gray-50">
   <!-- 开场动画（首次访问播放） -->
+  <div id="intro-overlay" class="hidden">
     <div class="intro-content">
       <!-- 逐字浮现：把文本放到 data-text 里 -->
       <h1 id="intro-title" class="intro-title" data-text="文化苦旅"></h1>
@@ -331,19 +332,14 @@
 
   <script>
     (function () {
-      const KEY = "introPlayed_v1"; // 改版本号可以让它重新播放一次
+      // 本页面改为每次访问都播放开场动画（不再使用 localStorage 记录）
       const overlay = document.getElementById("intro-overlay");
       const titleEl = document.getElementById("intro-title");
       const subEl = document.getElementById("intro-subtitle");
 
       if (!overlay || !titleEl || !subEl) return;
 
-      // 只在第一次访问播放
-      const played = localStorage.getItem(KEY) === "1";
-      if (played) {
-        overlay.classList.add("hidden");
-        return;
-      }
+      // 每次访问都播放开场动画
 
       // 显示遮罩并锁滚动
       overlay.classList.remove("hidden");
@@ -390,13 +386,9 @@
           // 移除遮罩 & 解锁
           overlay.classList.add("hidden");
           document.body.style.overflow = "auto";
-
-          // 记住：以后不再播放
-          localStorage.setItem(KEY, "1");
         }, total + 400);
       });
     })();
   </script>
 </body>
-
 </html>
