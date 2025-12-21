@@ -3,29 +3,312 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>莫高窟 · 详情</title>
+  <title>天一阁 · 详情</title>
+  <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
   <style>
-    html,body{margin:0;height:100%;font-family:system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial}
-    .container{max-width:980px;margin:24px auto;padding:16px}
-    .glass{background:linear-gradient(rgba(255,255,255,0.52),rgba(255,255,255,0.48));border:1px solid rgba(255,255,255,0.65);box-shadow:0 8px 30px rgba(0,0,0,0.12);border-radius:12px;padding:18px}
-    .images{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px}
-    .images img{width:48%;border-radius:8px;object-fit:cover;height:200px}
-    @media(max-width:640px){.images img{width:100%;height:auto}}
-    a.back{display:inline-block;margin-bottom:12px;color:#1e40af;text-decoration:none}
+    :root{
+      /* 天一阁：书卷感（墨色 + 赭金 + 松绿） */
+      --bg1:#0b0b10;
+      --bg2:#1b1a22;
+      --bg3:#2b1f14;
+      --card: rgba(255,255,255,0.10);
+      --card2: rgba(255,255,255,0.14);
+      --stroke: rgba(255,255,255,0.18);
+      --text: rgba(255,255,255,0.92);
+      --muted: rgba(255,255,255,0.72);
+      --shadow: 0 18px 60px rgba(0,0,0,0.38);
+      --radius: 18px;
+
+      --gold1: rgba(245, 196, 95, 0.95);
+      --gold2: rgba(250, 215, 125, 0.70);
+      --green: rgba(34,197,94,0.55);
+    }
+
+    *{box-sizing:border-box}
+    html,body{margin:0;height:100%}
+    body{
+      font-family: system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(980px 520px at 14% 12%, rgba(255,255,255,0.10), transparent 60%),
+        radial-gradient(880px 520px at 86% 16%, rgba(245,196,95,0.18), transparent 58%),
+        radial-gradient(900px 560px at 55% 92%, rgba(34,197,94,0.10), transparent 58%),
+        linear-gradient(135deg, var(--bg1) 0%, var(--bg2) 45%, var(--bg3) 100%);
+      overflow-x:hidden;
+    }
+
+    /* 纸纹/噪点质感 */
+    body::before{
+      content:"";
+      position:fixed; inset:0;
+      pointer-events:none;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)' opacity='.17'/%3E%3C/svg%3E");
+      mix-blend-mode:overlay;
+      opacity:.26;
+    }
+
+    .container{
+      max-width: 1040px;
+      margin: 0 auto;
+      padding: 22px 16px 64px;
+      position:relative;
+    }
+
+    /* 顶部栏 */
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin: 10px 0 18px;
+    }
+    .back{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      color: var(--text);
+      text-decoration:none;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.14);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.18);
+      transition: transform .2s ease, background .2s ease, border-color .2s ease;
+    }
+    .back:hover{
+      transform: translateY(-2px);
+      background: rgba(255,255,255,0.12);
+      border-color: rgba(255,255,255,0.22);
+    }
+    .back:active{transform: translateY(0)}
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      color: var(--muted);
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      font-size: 13px;
+      letter-spacing:.2px;
+      white-space:nowrap;
+    }
+
+    /* 主卡片（玻璃拟态） */
+    .glass{
+      background: linear-gradient(180deg, var(--card2), var(--card));
+      border: 1px solid var(--stroke);
+      box-shadow: var(--shadow);
+      border-radius: var(--radius);
+      overflow:hidden;
+      position:relative;
+      transform: translateY(8px);
+      opacity: 0;
+      animation: rise .8s cubic-bezier(.2,.8,.2,1) .05s forwards;
+    }
+    .glass::after{
+      content:"";
+      position:absolute; inset:-2px;
+      background:
+        radial-gradient(620px 260px at 18% 0%, rgba(255,255,255,0.14), transparent 60%),
+        radial-gradient(620px 280px at 84% 14%, rgba(245,196,95,0.14), transparent 58%);
+      pointer-events:none;
+    }
+    @keyframes rise{to{transform: translateY(0); opacity:1;}}
+
+    /* 头部信息 */
+    .hero{
+      padding: 22px 22px 14px;
+      display:flex;
+      align-items:flex-end;
+      justify-content:space-between;
+      gap:16px;
+      border-bottom: 1px solid rgba(255,255,255,0.10);
+      background:
+        radial-gradient(760px 280px at 15% 10%, rgba(245,196,95,0.16), transparent 60%),
+        radial-gradient(780px 320px at 86% 18%, rgba(34,197,94,0.10), transparent 56%);
+    }
+    h1{
+      margin: 0;
+      font-size: clamp(28px, 3.6vw, 42px);
+      line-height: 1.1;
+      letter-spacing: .6px;
+      text-shadow: 0 8px 30px rgba(0,0,0,0.32);
+    }
+    .subtitle{
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.7;
+      max-width: 52ch;
+    }
+    .hero-right{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.14);
+      color: var(--text);
+      font-size: 13px;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    .badge i{opacity:.9}
+    .badge.accent{
+      border-color: rgba(245,196,95,0.32);
+      background: linear-gradient(180deg, rgba(245,196,95,0.16), rgba(255,255,255,0.07));
+    }
+
+    /* 图片墙 */
+    .gallery{ padding: 18px 22px 6px; }
+    .images{
+      display:grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 12px;
+      margin: 0;
+      padding: 0;
+      list-style:none;
+    }
+    .images li:nth-child(1){grid-column: span 7;}
+    .images li:nth-child(2){grid-column: span 5;}
+    .images li:nth-child(3){grid-column: span 12;}
+    .images img{
+      width:100%;
+      height: 230px;
+      border-radius: 16px;
+      object-fit: cover;
+      border: 1px solid rgba(255,255,255,0.14);
+      box-shadow: 0 14px 40px rgba(0,0,0,0.28);
+      transform: translateY(0);
+      transition: transform .25s ease, box-shadow .25s ease, filter .25s ease;
+      filter: saturate(1.02) contrast(1.03);
+    }
+    .images img:hover{
+      transform: translateY(-4px);
+      box-shadow: 0 20px 56px rgba(0,0,0,0.35);
+      filter: saturate(1.10) contrast(1.06);
+    }
+    @media (max-width: 820px){
+      .hero{flex-direction:column; align-items:flex-start;}
+      .hero-right{justify-content:flex-start;}
+      .images{grid-template-columns: 1fr;}
+      .images li{grid-column: span 12;}
+      .images img{height: 210px;}
+    }
+
+    /* 正文 */
+    .content{ padding: 8px 22px 22px; }
+    .section{
+      padding: 14px 14px 6px;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.10);
+      margin-top: 12px;
+    }
+    .section-title{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      margin: 0 0 8px;
+      font-size: 15px;
+      letter-spacing:.3px;
+      color: rgba(255,255,255,0.88);
+    }
+    .dot{
+      width:10px;height:10px;border-radius:999px;
+      background: linear-gradient(135deg, var(--gold1), var(--green));
+      box-shadow: 0 8px 20px rgba(0,0,0,0.22);
+    }
+    .ch-para{
+      text-indent: 2em;
+      text-align: justify;
+      text-justify: inter-ideograph;
+      line-height: 2.0;
+      margin: 0 0 12px;
+      color: rgba(255,255,255,0.86);
+      font-size: 15.5px;
+      letter-spacing: .2px;
+    }
+    .footer-note{
+      margin-top: 14px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.05);
+      border: 1px dashed rgba(245,196,95,0.28);
+      color: rgba(255,255,255,0.70);
+      font-size: 13px;
+      line-height: 1.75;
+    }
+    @media (prefers-reduced-motion: reduce){
+      .glass{animation:none; opacity:1; transform:none;}
+      .images img, .back{transition:none;}
+    }
   </style>
 </head>
 <body>
   <div class="container">
-    <a class="back" href="index.html">← 返回主页</a>
-    <div class="glass">
-      <h1>莫高窟</h1>
-      <div class="images">
-        <img src="images/place2-1.jpg" alt="莫高窟图1">
-        <img src="images/place2-2.jpg" alt="莫高窟图2">
+    <div class="topbar">
+      <a class="back" href="index.html" aria-label="返回主页">
+        <i class="fa fa-arrow-left"></i>
+        <span>返回主页</span>
+      </a>
+      <div class="pill">
+        <i class="fa fa-map-marker"></i>
+        <span>浙江 · 宁波 · 天一阁</span>
       </div>
-      <p>第一段：莫高窟简介，艺术特色。</p>
-      <p>第二段：与作者/文本的关联或研究价值。</p>
     </div>
+
+    <main class="glass" role="main">
+      <header class="hero">
+        <div>
+          <h1>天一阁</h1>
+          <div class="subtitle">
+            中国现存最古老的私家藏书楼之一 —— 以“护书如护火”的建筑与制度智慧，延续书卷气与文脉。
+          </div>
+        </div>
+
+        <div class="hero-right" aria-label="快捷标签">
+          <div class="badge accent"><i class="fa fa-book"></i><span>私家藏书楼</span></div>
+          <div class="badge"><i class="fa fa-university"></i><span>明代 · 范钦</span></div>
+          <div class="badge"><i class="fa fa-shield"></i><span>防火护书</span></div>
+          <div class="badge"><i class="fa fa-leaf"></i><span>文脉传承</span></div>
+        </div>
+      </header>
+
+      <section class="gallery" aria-label="图片展示">
+        <ul class="images">
+          <!-- 保留你原来的图片路径：如需换成 place2-*.jpg，我也可以一键改 -->
+          <li><img src="天一阁1.jpg" alt="天一阁1"></li>
+          <li><img src="天一阁2.jpg" alt="天一阁2"></li>
+        </ul>
+      </section>
+
+      <section class="content" aria-label="正文内容">
+        <div class="section">
+          <h2 class="section-title"><span class="dot"></span><span>历史与典藏</span></h2>
+          <p class="ch-para">天一阁是中国现存最古老的私家藏书楼，坐落于浙江宁波，由明代兵部右侍郎范钦于嘉靖年间主持兴建。其名取“天一生水，地六成之”之意，以水喻火，寄托防火护书的愿景。阁内藏书以明代地方志、登科录等珍贵文献为特色，历经数百年风雨，见证了中华文脉的赓续传承。</p>
+        </div>
+
+        <div class="section">
+          <h2 class="section-title"><span class="dot"></span><span>文化地标与当代意义</span></h2>
+          <p class="ch-para">如今的天一阁不仅是藏书文化的瑰宝，更是集藏书、展陈、研究于一体的文化地标，承载着古人敬惜字纸、守护文明的智慧，也为当代人留存了触摸历史、对话先贤的珍贵窗口。</p>
+        </div>
+
+      </section>
+    </main>
   </div>
 </body>
 </html>

@@ -3,26 +3,260 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>地点三 · 详情</title>
+  <title>宁古塔 · 详情</title>
+  <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+
   <style>
-    html,body{margin:0;height:100%;font-family:system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial}
-    .container{max-width:980px;margin:24px auto;padding:16px}
-    .glass{background:linear-gradient(rgba(255,255,255,0.52),rgba(255,255,255,0.48));border:1px solid rgba(255,255,255,0.65);box-shadow:0 8px 30px rgba(0,0,0,0.12);border-radius:12px;padding:18px}
-    .images img{width:100%;border-radius:8px;object-fit:cover;height:220px;margin-bottom:12px}
-    a.back{display:inline-block;margin-bottom:12px;color:#1e40af;text-decoration:none}
+    :root{
+      /* 宁古塔：寒地 · 边疆 · 流放（仅色调不同） */
+      --bg1:#0a0f14;
+      --bg2:#111c26;
+      --bg3:#1f2f3d;
+
+      --card: rgba(255,255,255,0.10);
+      --card2: rgba(255,255,255,0.14);
+      --stroke: rgba(255,255,255,0.18);
+      --text: rgba(255,255,255,0.92);
+      --muted: rgba(255,255,255,0.72);
+      --shadow: 0 18px 60px rgba(0,0,0,0.40);
+      --radius: 18px;
+
+      --ice: rgba(148,197,255,0.55);
+      --ember: rgba(217,119,6,0.55);
+    }
+
+    *{box-sizing:border-box}
+    html,body{margin:0;height:100%}
+
+    body{
+      font-family: system-ui,-apple-system,Segoe UI,Roboto,"PingFang SC","Microsoft YaHei",sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(900px 520px at 16% 14%, rgba(255,255,255,0.10), transparent 60%),
+        radial-gradient(880px 520px at 86% 18%, rgba(148,197,255,0.22), transparent 58%),
+        radial-gradient(900px 560px at 55% 92%, rgba(217,119,6,0.12), transparent 58%),
+        linear-gradient(135deg, var(--bg1) 0%, var(--bg2) 45%, var(--bg3) 100%);
+      overflow-x:hidden;
+    }
+
+    body::before{
+      content:"";
+      position:fixed;
+      inset:0;
+      pointer-events:none;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)' opacity='.18'/%3E%3C/svg%3E");
+      mix-blend-mode:overlay;
+      opacity:.28;
+    }
+
+    .container{
+      max-width:1040px;
+      margin:0 auto;
+      padding:22px 16px 64px;
+      position:relative;
+    }
+
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin:10px 0 18px;
+    }
+
+    .back{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      padding:10px 14px;
+      border-radius:999px;
+      color:var(--text);
+      text-decoration:none;
+      background:rgba(255,255,255,0.08);
+      border:1px solid rgba(255,255,255,0.14);
+      backdrop-filter:blur(10px);
+      box-shadow:0 10px 30px rgba(0,0,0,0.18);
+      transition:.2s;
+    }
+    .back:hover{transform:translateY(-2px);background:rgba(255,255,255,0.12)}
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 12px;
+      border-radius:999px;
+      font-size:13px;
+      color:var(--muted);
+      background:rgba(255,255,255,0.06);
+      border:1px solid rgba(255,255,255,0.12);
+      backdrop-filter:blur(10px);
+    }
+
+    .glass{
+      background:linear-gradient(180deg,var(--card2),var(--card));
+      border:1px solid var(--stroke);
+      box-shadow:var(--shadow);
+      border-radius:var(--radius);
+      overflow:hidden;
+      animation:rise .8s ease forwards;
+      opacity:0;
+      transform:translateY(8px);
+    }
+    @keyframes rise{to{opacity:1;transform:none}}
+
+    .hero{
+      padding:22px 22px 14px;
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-end;
+      gap:16px;
+      border-bottom:1px solid rgba(255,255,255,0.10);
+      background:
+        radial-gradient(760px 300px at 18% 12%, rgba(148,197,255,0.20), transparent 60%),
+        radial-gradient(760px 340px at 86% 22%, rgba(217,119,6,0.12), transparent 56%);
+    }
+
+    h1{
+      margin:0;
+      font-size:clamp(28px,3.6vw,42px);
+      letter-spacing:.6px;
+      text-shadow:0 8px 30px rgba(0,0,0,0.35);
+    }
+
+    .subtitle{
+      margin-top:10px;
+      color:var(--muted);
+      font-size:14px;
+      max-width:52ch;
+      line-height:1.7;
+    }
+
+    .hero-right{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:10px 12px;
+      border-radius:12px;
+      font-size:13px;
+      background:rgba(255,255,255,0.08);
+      border:1px solid rgba(255,255,255,0.14);
+      backdrop-filter:blur(10px);
+    }
+
+    .badge.accent{
+      background:linear-gradient(180deg,rgba(148,197,255,0.22),rgba(255,255,255,0.06));
+      border-color:rgba(148,197,255,0.35);
+    }
+
+    .gallery{padding:18px 22px 6px}
+    .images{
+      display:grid;
+      grid-template-columns:repeat(12,1fr);
+      gap:12px;
+      list-style:none;
+      margin:0;padding:0;
+    }
+    .images li:nth-child(1){grid-column:span 7}
+    .images li:nth-child(2){grid-column:span 5}
+    .images img{
+      width:100%;
+      height:230px;
+      object-fit:cover;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,0.14);
+      box-shadow:0 14px 40px rgba(0,0,0,0.30);
+      transition:.25s;
+    }
+    .images img:hover{transform:translateY(-4px)}
+
+    @media(max-width:820px){
+      .hero{flex-direction:column;align-items:flex-start}
+      .images{grid-template-columns:1fr}
+      .images li{grid-column:span 12}
+    }
+
+    .content{padding:8px 22px 22px}
+    .section{
+      margin-top:12px;
+      padding:14px 14px 6px;
+      border-radius:14px;
+      background:rgba(255,255,255,0.06);
+      border:1px solid rgba(255,255,255,0.10);
+    }
+    .section-title{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      font-size:15px;
+      margin-bottom:8px;
+    }
+    .dot{
+      width:10px;height:10px;border-radius:999px;
+      background:linear-gradient(135deg,var(--ice),var(--ember));
+    }
+    .ch-para{
+      text-indent:2em;
+      text-align:justify;
+      line-height:2.0;
+      margin:0 0 12px;
+      font-size:15.5px;
+      color:rgba(255,255,255,0.86);
+    }
   </style>
 </head>
+
 <body>
-  <div class="container">
-    <a class="back" href="index.html">← 返回主页</a>
-    <div class="glass">
-      <h1>地点三</h1>
-      <div class="images">
-        <img src="images/place3-1.jpg" alt="地点三图1">
-      </div>
-      <p>第一段：地点三的简介与历史背景。</p>
-      <p>第二段：文化意义与参考资料。</p>
-    </div>
+<div class="container">
+
+  <div class="topbar">
+    <a class="back" href="index.html"><i class="fa fa-arrow-left"></i> 返回主页</a>
+    <div class="pill"><i class="fa fa-map-marker"></i> 黑龙江 · 牡丹江 / 宁安 · 宁古塔</div>
   </div>
+
+  <main class="glass">
+    <header class="hero">
+      <div>
+        <h1>宁古塔</h1>
+        <div class="subtitle">
+          清代东北边疆重镇与流放之地 —— 寒地、权力与文化迁徙交织的历史坐标。
+        </div>
+      </div>
+      <div class="hero-right">
+        <div class="badge accent"><i class="fa fa-paint-brush"></i> 流放文化</div>
+        <div class="badge"><i class="fa fa-university"></i> 边疆重镇</div>
+        <div class="badge"><i class="fa fa-road"></i> 满族发祥</div>
+        <div class="badge"><i class="fa fa-shield"></i> 东北历史</div>
+      </div>
+    </header>
+
+    <section class="gallery">
+      <ul class="images">
+        <li><img src="宁古塔1.jpg" alt="宁古塔图1"></li>
+        <li><img src="宁古塔2.jpg" alt="宁古塔图2"></li>
+      </ul>
+    </section>
+
+    <section class="content">
+      <div class="section">
+        <h2 class="section-title"><span class="dot"></span><span>历史与边疆</span></h2>
+        <p class="ch-para">宁古塔，满语意为“六个部落”，是清代东北边疆的重要军事与行政中心，位于今黑龙江省牡丹江市一带。其地理位置决定了它在清初边疆治理、民族融合与防御体系中的关键地位。</p>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title"><span class="dot"></span><span>流放文化</span></h2>
+        <p class="ch-para">自顺治年间起，宁古塔成为清代重要的流放地之一。大量文人、官员被迁至此地，使中原文化在苦寒边地传播生根，形成独特的流放文化传统，也深刻影响了东北地区的社会结构与文化面貌。</p>
+      </div>
+    </section>
+  </main>
+
+</div>
 </body>
 </html>

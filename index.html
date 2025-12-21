@@ -106,6 +106,17 @@
       opacity: 0.92;
     }
 
+    /* 中文段落排版：首行缩进与分段（适用于 #intro 区域） */
+    .ch-para {
+      text-indent: 2em;
+      text-align: justify;
+      text-justify: inter-ideograph;
+      line-height: 1.9;
+      margin-top: 0;
+      margin-bottom: 1rem;
+      white-space: normal;
+    }
+
     /* ====== 逐字浮现：每个字 ====== */
     .intro-char {
       display: inline-block;
@@ -136,7 +147,308 @@
         visibility: hidden;
       }
     }
-  </style>
+
+/* ====== Nav 美化：渐变玻璃 + 渐变字体 + 选中动效 ====== */
+
+/* 导航整体：更高级的渐变玻璃 */
+.top-nav{
+  background: linear-gradient(135deg,
+    rgba(255,255,255,0.58),
+    rgba(255,255,255,0.35)
+  );
+  border-bottom: 1px solid rgba(255,255,255,0.55);
+  box-shadow: 0 10px 28px rgba(0,0,0,0.10);
+  -webkit-backdrop-filter: blur(16px) saturate(150%);
+  backdrop-filter: blur(16px) saturate(150%);
+}
+
+/* 增加一层“细腻高光”让玻璃更像真材质 */
+.top-nav::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background: radial-gradient(circle at 20% 0%,
+      rgba(255,255,255,0.55),
+      rgba(255,255,255,0) 60%
+    );
+  opacity: 0.85;
+}
+
+/* 站点标题：渐变文字 + 微光 */
+.nav-brand{
+  font-family: "STXingkai","华文行楷",serif;
+  letter-spacing: 0.14em;
+  background: linear-gradient(90deg, #0ea5e9, #8b5cf6, #f97316);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: 0 10px 22px rgba(0,0,0,0.16);
+}
+
+/* 导航链接：胶囊形 + 渐变描边感 + hover/active 动画 */
+.nav-link{
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  padding: .55rem .9rem;
+  border-radius: 999px;
+
+  color: rgba(17,24,39,0.92);
+  font-weight: 600;
+
+  transition: transform 200ms ease, color 200ms ease, background 200ms ease, box-shadow 200ms ease;
+  will-change: transform;
+}
+
+/* hover 背景（淡淡渐变） */
+.nav-link:hover{
+  transform: translateY(-1px);
+  background: linear-gradient(90deg,
+    rgba(14,165,233,0.18),
+    rgba(139,92,246,0.16),
+    rgba(249,115,22,0.14)
+  );
+  box-shadow: 0 10px 20px rgba(0,0,0,0.10);
+  color: rgba(17,24,39,1);
+}
+
+/* 下划线流光（hover时出现，active时常驻） */
+.nav-link::after{
+  content:"";
+  position:absolute;
+  left: 14px;
+  right: 14px;
+  bottom: 8px;
+  height: 2px;
+  border-radius: 999px;
+
+  background: linear-gradient(90deg, #0ea5e9, #8b5cf6, #f97316);
+  transform: scaleX(0);
+  transform-origin: left;
+  opacity: 0;
+  transition: transform 240ms ease, opacity 240ms ease;
+}
+
+/* hover：下划线滑入 */
+.nav-link:hover::after{
+  transform: scaleX(1);
+  opacity: 1;
+}
+
+/* 当前页面选中：文字渐变 + 下划线常驻 + 呼吸光晕 */
+.nav-link.is-active{
+  background: linear-gradient(90deg,
+    rgba(14,165,233,0.22),
+    rgba(139,92,246,0.20),
+    rgba(249,115,22,0.18)
+  );
+  color: rgba(17,24,39,1);
+  box-shadow: 0 14px 26px rgba(0,0,0,0.14);
+}
+
+.nav-link.is-active::after{
+  transform: scaleX(1);
+  opacity: 1;
+}
+
+/* active 的轻微“呼吸”动画（不刺眼） */
+@keyframes navPulse {
+  0%,100% { filter: drop-shadow(0 0 0 rgba(139,92,246,0)); }
+  50%     { filter: drop-shadow(0 10px 18px rgba(139,92,246,0.18)); }
+}
+.nav-link.is-active{
+  animation: navPulse 1.8s ease-in-out infinite;
+}
+
+/* 点击/按下反馈 */
+.nav-link:active{
+  transform: translateY(0);
+  box-shadow: 0 8px 16px rgba(0,0,0,0.10);
+}
+
+/* ====== 地点查看 · 展览级入口卡片（升级版） ====== */
+.place-card{
+  position: relative;
+  height: 160px;
+  border-radius: 22px;
+  overflow: hidden;
+  isolation: isolate;
+
+  display: grid;
+  place-items: center;
+
+  /* 让文字与“卡片感”更稳 */
+  padding: 18px;
+
+  /* 玻璃底 + 轻微色彩气氛 */
+  background:
+    radial-gradient(1200px 380px at 20% 10%, rgba(255,255,255,.72), rgba(255,255,255,0) 55%),
+    radial-gradient(900px 300px at 80% 90%, rgba(255,255,255,.38), rgba(255,255,255,0) 60%),
+    linear-gradient(135deg, rgba(255,255,255,0.62), rgba(255,255,255,0.30));
+
+  /* 不用普通 border，改用“渐变描边”（见 ::before） */
+  border: 0;
+
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  backdrop-filter: blur(18px) saturate(160%);
+
+  box-shadow:
+    0 14px 32px rgba(0,0,0,.14),
+    inset 0 1px 0 rgba(255,255,255,.55);
+
+  transform: translateY(0);
+  transition: transform 340ms ease, box-shadow 340ms ease, filter 340ms ease;
+  will-change: transform;
+}
+
+/* 渐变描边（核心高级感来源） */
+.place-card::before{
+  content:"";
+  position:absolute;
+  inset: 0;
+  padding: 1px;                 /* 描边厚度 */
+  border-radius: 22px;
+  background: linear-gradient(135deg,
+    rgba(14,165,233,.70),
+    rgba(139,92,246,.55),
+    rgba(249,115,22,.45),
+    rgba(255,255,255,.55)
+  );
+
+  /* 只显示边框，不盖住内容 */
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+
+  opacity: .65;
+  pointer-events: none;
+  z-index: 1;
+  transition: opacity 340ms ease;
+}
+
+/* 细腻纹理（近似“纸面/水墨颗粒”质感） */
+.place-card::after{
+  content:"";
+  position:absolute;
+  inset:-40%;
+  background:
+    radial-gradient(circle at 30% 30%, rgba(255,255,255,.35), rgba(255,255,255,0) 52%),
+    repeating-linear-gradient(
+      110deg,
+      rgba(255,255,255,.10) 0px,
+      rgba(255,255,255,.10) 2px,
+      rgba(255,255,255,0) 8px,
+      rgba(255,255,255,0) 14px
+    );
+  opacity: .18;
+  filter: blur(.2px);
+  transform: rotate(8deg);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* 标题文字：更像“题签/匾额” */
+.place-card h3{
+  position: relative;
+  z-index: 2;
+
+  font-family: "STXingkai","华文行楷",serif;
+  font-size: clamp(1.7rem, 2.3vw, 2.15rem);
+  letter-spacing: .26em;
+  padding-left: .26em;         /* 抵消字距 */
+
+  color: rgba(17,24,39,.94);
+  text-shadow:
+    0 1px 0 rgba(255,255,255,.55),
+    0 14px 26px rgba(0,0,0,.16);
+
+  transition: transform 320ms ease, color 320ms ease, letter-spacing 320ms ease;
+}
+
+/* 悬停：抬升 + 微倾斜 + 更强光晕 */
+.place-card:hover{
+  transform: translateY(-10px) rotateX(5deg) rotateY(-4deg) scale(1.02);
+  box-shadow:
+    0 28px 58px rgba(0,0,0,.26),
+    inset 0 1px 0 rgba(255,255,255,.65);
+  filter: saturate(1.05);
+}
+
+.place-card:hover::before{
+  opacity: .92;
+}
+
+/* 悬停文字：渐变 + 轻微展开（更精致，但不浮夸） */
+.place-card:hover h3{
+  background: linear-gradient(90deg, #0ea5e9, #8b5cf6, #f97316);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+
+  transform: translateY(-1px) scale(1.06);
+  letter-spacing: .30em;
+}
+
+/* “光带扫过”动效（hover 触发） */
+.place-card .shine{
+  position:absolute;
+  inset:-30%;
+  background: linear-gradient(115deg,
+    rgba(255,255,255,0) 30%,
+    rgba(255,255,255,.55) 46%,
+    rgba(255,255,255,0) 62%
+  );
+  transform: translateX(-60%) rotate(6deg);
+  opacity: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.place-card:hover .shine{
+  opacity: .55;
+  animation: placeShine 1.1s ease forwards;
+}
+
+@keyframes placeShine{
+  to{ transform: translateX(45%) rotate(6deg); opacity: .0; }
+}
+
+/* 四张卡片：轻微错位浮动（很“精美”但不吵） */
+@keyframes placeFloat{
+  0%,100% { transform: translateY(0); }
+  50%     { transform: translateY(-6px); }
+}
+.place-card:nth-child(1){ animation: placeFloat 5.6s ease-in-out infinite; }
+.place-card:nth-child(2){ animation: placeFloat 6.2s ease-in-out infinite; animation-delay: .2s; }
+.place-card:nth-child(3){ animation: placeFloat 5.9s ease-in-out infinite; animation-delay: .35s; }
+.place-card:nth-child(4){ animation: placeFloat 6.5s ease-in-out infinite; animation-delay: .15s; }
+
+/* 按下反馈 */
+.place-card:active{
+  transform: translateY(-2px) scale(.985);
+}
+
+/* 兼容：减少动态效果偏好 */
+@media (prefers-reduced-motion: reduce){
+  .place-card,
+  .place-card:hover,
+  .place-card .shine,
+  .place-card:nth-child(1),
+  .place-card:nth-child(2),
+  .place-card:nth-child(3),
+  .place-card:nth-child(4){
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* place-grid 透视 */
+.place-grid{ perspective: 1000px; }
+  </style> 
 </head>
 <body class="bg-gray-50">
   <!-- 开场动画（首次访问播放） -->
@@ -147,55 +459,59 @@
       <p id="intro-subtitle" class="intro-subtitle" data-text="Knowledge Graph & Spatial Narrative"></p>
     </div>
   </div>
-  <!-- 导航栏（替换原 sticky header） -->
-  <header class="top-nav py-4" style="background-color: #ffffff;">
-    <nav class="container mx-auto px-4 flex flex-wrap justify-between items-center">
-      <h1 class="text-3xl md:text-4xl font-bold text-black" style="font-family: 'STXingkai', '华文行楷', serif;">文化苦旅</h1>
-      <ul class="flex flex-wrap space-x-4 md:space-x-6 mt-2 md:mt-0">
-        <li><a href="knowledge.html" class="hover:text-blue-300 transition-colors"> 知识图谱 </a></li>
-        <li><a href="gis.html" class="hover:text-blue-300 transition-colors"> GIS地图 </a></li>
-        <li><a href="heatmap.html" class="hover:text-blue-300 transition-colors"> 热力图 </a></li>
-        <li><a href="reading.html" class="hover:text-blue-300 transition-colors"> 阅读分享 </a></li>
+  <!-- 导航栏（已美化：渐变玻璃 + 渐变文字 + 动效） -->
+  <header class="top-nav py-4">
+    <nav class="container mx-auto px-4 flex flex-wrap justify-between items-center relative">
+      <h1 class="text-3xl md:text-4xl font-bold nav-brand">文化苦旅</h1>
+
+      <ul class="flex flex-wrap gap-2 md:gap-3 mt-2 md:mt-0">
+        <li><a href="knowledge.html" class="nav-link">知识图谱</a></li>
+        <li><a href="gis.html" class="nav-link">GIS地图</a></li>
+        <li><a href="heatmap.html" class="nav-link">热力图</a></li>
+        <li><a href="reading.html" class="nav-link">阅读分享</a></li>
       </ul>
     </nav>
-  </header>
+  </header> 
 
   <!-- 主内容区 -->
   <main class="container mx-auto px-4 py-8">
     <!-- 系统简介：磨砂玻璃 -->
     <section id="intro" class="mb-16 glass p-5">
       <h2 class="text-2xl md:text-3xl font-bold mb-6 text-gray-800 border-b pb-2"> 《文化苦旅》的文化网络与空间轨迹研究 </h2>
-      <p class="text-gray-600 text-lg leading-relaxed"> 简介内容：对该网站的具体描述 </p>
+      <div class="text-gray-600 text-lg">
+        <p class="ch-para leading-relaxed">本网站以余秋雨的著作《文化苦旅》为研究对象，尝试在数字人文与空间信息技术的视角下，重构文本中所蕴含的文化网络与空间轨迹。</p>
+        <p class="ch-para leading-relaxed">《文化苦旅》以实地行走为线索，将历史遗址、文化符号与个体思考交织在一起，形成一张跨越时间与地域的文化叙事网络。基于此，本网站通过文本分析、文化要素抽取与空间可视化手段，对书中涉及的重要地点、文化意象及其关联关系进行系统梳理与呈现，力图揭示文本背后隐含的文化流动路径与空间结构特征。</p>
+        <p class="ch-para leading-relaxed">网站融合知识图谱、交互式地图与可视化分析等形式，实现文本内容从“线性阅读”向“网络化、空间化理解”的转变，既为《文化苦旅》的再解读提供新的研究视角，也探索文学研究与数字技术结合的可能路径。</p>
+        <p class="ch-para leading-relaxed">本项目旨在为文学研究、文化地理研究及数字人文实践提供一个可视化、可交互的实验性案例。</p>
+      </div>
     </section>
 
     <!-- place1,2,3,4 分别对应4个地名 -->
     <section id="concepts" class="mb-16 glass p-5">
       <h2 class="text-2xl md:text-3xl font-bold mb-6 text-gray-800 border-b pb-2"> 地点查看 </h2>
-      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        <a href="place1.html" class="glass border border-gray-200 rounded-lg p-5 hover:shadow-lg cursor-pointer transition-shadow block">
-          <h3 class="text-xl font-bold text-blue-700"> 都江堰 </h3>
-          <p class="text-gray-500 mt-1"> 介绍 </p>
-          <span class="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded mt-3"> 概念分类标签 </span>
-        </a>
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 place-grid">
+  
+  <a href="place1.html" class="place-card">
+    <span class="shine"></span>
+    <h3>都江堰</h3>
+  </a>
 
-        <a href="place2.html" class="glass border border-gray-200 rounded-lg p-5 hover:shadow-lg cursor-pointer transition-shadow block">
-          <h3 class="text-xl font-bold text-blue-700"> 莫高窟 </h3>
-          <p class="text-gray-500 mt-1"> 介绍 </p>
-          <span class="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded mt-3"> 概念分类标签 </span>
-        </a>
+  <a href="place2.html" class="place-card">
+    <span class="shine"></span>
+    <h3>天一阁</h3>
+  </a>
 
-        <a href="place3.html" class="glass border border-gray-200 rounded-lg p-5 hover:shadow-lg cursor-pointer transition-shadow block">
-          <h3 class="text-xl font-bold text-blue-700"> 地点三 </h3>
-          <p class="text-gray-500 mt-1"> 介绍 </p>
-          <span class="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded mt-3"> 概念分类标签 </span>
-        </a>
+  <a href="place3.html" class="place-card">
+    <span class="shine"></span>
+    <h3>宁古塔</h3>
+  </a>
 
-        <a href="place4.html" class="glass border border-gray-200 rounded-lg p-5 hover:shadow-lg cursor-pointer transition-shadow block">
-          <h3 class="text-xl font-bold text-blue-700"> 地点四 </h3>
-          <p class="text-gray-500 mt-1"> 介绍 </p>
-          <span class="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded mt-3"> 概念分类标签 </span>
-        </a>
-      </div>
+  <a href="place4.html" class="place-card">
+    <span class="shine"></span>
+    <h3>莫高窟</h3>
+  </a>
+
+</div>
     </section>
 
   <!-- 页脚：移除深色背景改为磨砂（如需保持深色可调整颜色） -->
@@ -387,6 +703,25 @@
           overlay.classList.add("hidden");
           document.body.style.overflow = "auto";
         }, total + 400);
+      });
+    })();
+  </script>
+
+  <script>
+    // 当前页面导航高亮：根据 URL 自动给对应链接加 .is-active
+    (function () {
+      const links = document.querySelectorAll('header.top-nav a.nav-link');
+      if (!links.length) return;
+
+      const path = location.pathname.split('/').pop() || 'index.html';
+
+      links.forEach(a => {
+        const href = (a.getAttribute('href') || '').split('/').pop();
+        if (!href) return;
+
+        if (href === path) {
+          a.classList.add('is-active');
+        }
       });
     })();
   </script>

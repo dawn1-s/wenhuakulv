@@ -6,29 +6,326 @@
   <title>都江堰 · 详情</title>
   <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
   <style>
-    html,body{margin:0;height:100%;font-family:system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial}
-    .container{max-width:980px;margin:24px auto;padding:16px}
-    .glass{background:linear-gradient(rgba(255,255,255,0.52),rgba(255,255,255,0.48));border:1px solid rgba(255,255,255,0.65);box-shadow:0 8px 30px rgba(0,0,0,0.12);border-radius:12px;padding:18px}
-    .images{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px}
-    .images img{width:calc(33.333% - 8px);border-radius:8px;object-fit:cover;height:160px}
-    @media(max-width:640px){.images img{width:100%;height:auto}}
-    a.back{display:inline-block;margin-bottom:12px;color:#1e40af;text-decoration:none}
+    :root{
+      --bg1:#0b1020;
+      --bg2:#0f2a4f;
+      --bg3:#114b5f;
+      --card: rgba(255,255,255,0.10);
+      --card2: rgba(255,255,255,0.14);
+      --stroke: rgba(255,255,255,0.18);
+      --text: rgba(255,255,255,0.92);
+      --muted: rgba(255,255,255,0.72);
+      --shadow: 0 18px 60px rgba(0,0,0,0.35);
+      --radius: 18px;
+    }
+
+    /* 基础 */
+    *{box-sizing:border-box}
+    html,body{margin:0;height:100%}
+    body{
+      font-family: system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(1000px 550px at 12% 10%, rgba(255,255,255,0.12), transparent 60%),
+        radial-gradient(900px 520px at 88% 12%, rgba(56,189,248,0.24), transparent 55%),
+        radial-gradient(800px 520px at 55% 92%, rgba(34,197,94,0.15), transparent 55%),
+        linear-gradient(135deg, var(--bg1) 0%, var(--bg2) 45%, var(--bg3) 100%);
+      overflow-x:hidden;
+    }
+
+    /* 细腻的噪点质感 */
+    body::before{
+      content:"";
+      position:fixed; inset:0;
+      pointer-events:none;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.16'/%3E%3C/svg%3E");
+      mix-blend-mode:overlay;
+      opacity:.28;
+    }
+
+    /* 布局容器 */
+    .container{
+      max-width: 1040px;
+      margin: 0 auto;
+      padding: 22px 16px 64px;
+      position:relative;
+    }
+
+    /* 顶部栏 */
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin: 10px 0 18px;
+    }
+
+    .back{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      color: var(--text);
+      text-decoration:none;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.14);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.18);
+      transition: transform .2s ease, background .2s ease, border-color .2s ease;
+    }
+    .back:hover{
+      transform: translateY(-2px);
+      background: rgba(255,255,255,0.12);
+      border-color: rgba(255,255,255,0.22);
+    }
+    .back:active{transform: translateY(0)}
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      color: var(--muted);
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      font-size: 13px;
+      letter-spacing:.2px;
+      white-space:nowrap;
+    }
+
+    /* 主卡片（玻璃拟态） */
+    .glass{
+      background: linear-gradient(180deg, var(--card2), var(--card));
+      border: 1px solid var(--stroke);
+      box-shadow: var(--shadow);
+      border-radius: var(--radius);
+      overflow:hidden;
+      position:relative;
+      transform: translateY(8px);
+      opacity: 0;
+      animation: rise .8s cubic-bezier(.2,.8,.2,1) .05s forwards;
+    }
+    .glass::after{
+      content:"";
+      position:absolute; inset:-2px;
+      background: radial-gradient(600px 240px at 15% 0%, rgba(255,255,255,0.16), transparent 60%);
+      pointer-events:none;
+    }
+
+    @keyframes rise{
+      to{ transform: translateY(0); opacity:1; }
+    }
+
+    /* 头图区域 */
+    .hero{
+      padding: 22px 22px 14px;
+      display:flex;
+      align-items:flex-end;
+      justify-content:space-between;
+      gap:16px;
+      border-bottom: 1px solid rgba(255,255,255,0.10);
+      background:
+        radial-gradient(700px 240px at 20% 10%, rgba(56,189,248,0.18), transparent 60%),
+        radial-gradient(700px 280px at 85% 20%, rgba(34,197,94,0.14), transparent 55%);
+    }
+    h1{
+      margin: 0;
+      font-size: clamp(28px, 3.6vw, 42px);
+      line-height: 1.1;
+      letter-spacing: .6px;
+      text-shadow: 0 8px 30px rgba(0,0,0,0.30);
+    }
+    .subtitle{
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.7;
+      max-width: 48ch;
+    }
+
+    .hero-right{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.14);
+      color: var(--text);
+      font-size: 13px;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    .badge i{opacity:.9}
+
+    /* 图片墙 */
+    .gallery{
+      padding: 18px 22px 6px;
+    }
+    .images{
+      display:grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 12px;
+      margin: 0;
+      padding: 0;
+      list-style:none;
+    }
+    .images li:nth-child(1){grid-column: span 7;}
+    .images li:nth-child(2){grid-column: span 5;}
+    .images li:nth-child(3){grid-column: span 12;}
+
+    .images img{
+      width:100%;
+      height: 230px;
+      border-radius: 16px;
+      object-fit: cover;
+      border: 1px solid rgba(255,255,255,0.14);
+      box-shadow: 0 14px 40px rgba(0,0,0,0.28);
+      transform: translateY(0);
+      transition: transform .25s ease, box-shadow .25s ease, filter .25s ease;
+      filter: saturate(1.05) contrast(1.03);
+    }
+    .images img:hover{
+      transform: translateY(-4px);
+      box-shadow: 0 20px 56px rgba(0,0,0,0.35);
+      filter: saturate(1.12) contrast(1.06);
+    }
+
+    /* 移动端布局 */
+    @media (max-width: 820px){
+      .hero{flex-direction:column; align-items:flex-start;}
+      .hero-right{justify-content:flex-start;}
+      .images{grid-template-columns: 1fr; }
+      .images li{grid-column: span 12;}
+      .images img{height: 210px;}
+    }
+
+    /* 正文排版 */
+    .content{
+      padding: 8px 22px 22px;
+      display:grid;
+      grid-template-columns: 1fr;
+      gap: 2px;
+    }
+
+    .section{
+      padding: 14px 14px 6px;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.10);
+      margin-top: 12px;
+    }
+    .section-title{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      margin: 0 0 8px;
+      font-size: 15px;
+      letter-spacing:.3px;
+      color: rgba(255,255,255,0.88);
+    }
+    .dot{
+      width:10px;height:10px;border-radius:999px;
+      background: linear-gradient(135deg, rgba(56,189,248,0.95), rgba(34,197,94,0.85));
+      box-shadow: 0 8px 20px rgba(0,0,0,0.22);
+    }
+
+    /* 中文段落：首行缩进与合适行高 */
+    .ch-para{
+      text-indent: 2em;
+      text-align: justify;
+      text-justify: inter-ideograph;
+      line-height: 2.0;
+      margin: 0 0 12px;
+      color: rgba(255,255,255,0.86);
+      font-size: 15.5px;
+      letter-spacing: .2px;
+    }
+
+    /* 页脚小提示 */
+    .footer-note{
+      margin-top: 14px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.05);
+      border: 1px dashed rgba(255,255,255,0.18);
+      color: rgba(255,255,255,0.70);
+      font-size: 13px;
+      line-height: 1.75;
+    }
+
+    /* 减少动效（无障碍） */
+    @media (prefers-reduced-motion: reduce){
+      .glass{animation:none; opacity:1; transform:none;}
+      .images img{transition:none;}
+      .back{transition:none;}
+    }
   </style>
 </head>
 <body>
   <div class="container">
-    <a class="back" href="index.html">← 返回主页</a>
-    <div class="glass">
-      <h1>都江堰</h1>
-      <div class="images">
-        <img src="images/place1-1.jpg" alt="都江堰图1">
-        <img src="images/place1-2.jpg" alt="都江堰图2">
-        <img src="images/place1-3.jpg" alt="都江堰图3">
+    <div class="topbar">
+      <a class="back" href="index.html" aria-label="返回主页">
+        <i class="fa fa-arrow-left"></i>
+        <span>返回主页</span>
+      </a>
+      <div class="pill">
+        <i class="fa fa-map-marker"></i>
+        <span>四川 · 成都 · 都江堰</span>
       </div>
-      <p>第一段文字：简短介绍都江堰的历史与价值。</p>
-      <p>第二段文字：地理位置、景点要点或与《文化苦旅》文本的关联。</p>
-      <p>第三段文字：访问建议或引用出处。</p>
     </div>
+
+    <main class="glass" role="main">
+      <header class="hero">
+        <div>
+          <h1>都江堰</h1>
+          <div class="subtitle">
+            世界文化遗产与无坝引水水利工程典范 —— 以工程理性连接山川与文明，也连接《文化苦旅》的文化叙事。
+          </div>
+        </div>
+
+        <div class="hero-right" aria-label="快捷信息">
+          <div class="badge"><i class="fa fa-tint"></i><span>分水 · 排沙 · 控流</span></div>
+          <div class="badge"><i class="fa fa-leaf"></i><span>人与自然共生</span></div>
+          <div class="badge"><i class="fa fa-book"></i><span>《文化苦旅》文本关联</span></div>
+        </div>
+      </header>
+
+      <section class="gallery" aria-label="图片展示">
+        <ul class="images">
+          <li><img src="都江堰1.jpg" alt="都江堰1"></li>
+          <li><img src="都江堰2.jpg" alt="都江堰2"></li>
+        </ul>
+      </section>
+
+      <section class="content" aria-label="正文内容">
+        <div class="section">
+          <h2 class="section-title"><span class="dot"></span><span>历史与价值</span></h2>
+          <p class="ch-para">都江堰始建于战国时期秦昭王年间，由蜀郡太守李冰父子主持修建，是世界上迄今仍在使用的最古老、最完整的无坝引水水利工程。它以“分水、排沙、控流”为核心思想，成功解决了岷江水患与灌溉难题，使成都平原成为“天府之国”。都江堰不仅是中国古代水利工程智慧的集中体现，也被视为人与自然和谐共生的典范，具有极高的历史、科学与文化价值。</p>
+        </div>
+
+        <div class="section">
+          <h2 class="section-title"><span class="dot"></span><span>地理位置与文本关联</span></h2>
+          <p class="ch-para">都江堰位于四川省成都市都江堰市，地处岷江出山口，是连接高原与平原的关键地理节点。核心工程包括鱼嘴分水堤、飞沙堰和宝瓶口，形成一套精妙而稳定的水系结构。在余秋雨的《文化苦旅》中，都江堰被视为中国文化理性精神的象征，作者通过对其工程理性的书写，强调了中华文明中克制、顺应与长久思维的文化内涵，使这一水利工程升华为文化精神的载体。</p>
+        </div>
+
+        <div class="section">
+          <h2 class="section-title"><span class="dot"></span><span>参观建议与参考</span></h2>
+          <p class="ch-para">参观都江堰建议结合实地游览与文本阅读同步进行，既可直观理解工程结构，也能深化对其文化意涵的认知。最佳参观季节为春秋两季，水量适中、视野清晰。相关历史资料可参考《史记·河渠书》及都江堰水利工程官方介绍，而文学解读则以余秋雨《文化苦旅》中〈都江堰〉一文为重要参考来源，有助于从工程与文化双重视角理解这一世界文化遗产。</p>
+        </div>
+
+      </section>
+    </main>
   </div>
 </body>
 </html>
